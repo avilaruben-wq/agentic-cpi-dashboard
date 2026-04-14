@@ -2,6 +2,7 @@ import React from 'react';
 import { theme } from '../../theme';
 import { scenarios } from '../../data/scenarioData';
 import { BarChartCard } from '../charts/BarChartCard';
+import { ViewHeader } from '../shared/ViewHeader';
 import { formatNumber, formatCurrency, formatPercent } from '../../utils/format';
 import { Scenario } from '../../types/scenario';
 
@@ -100,11 +101,10 @@ export const ScenarioView: React.FC = () => {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: theme.sp(5) }}>
-      <div style={{
-        fontSize: theme.fontSize.lg, fontWeight: theme.fontWeight.bold, color: theme.text,
-      }}>
-        Scenario Comparison — Conservative / Base / Flex
-      </div>
+      <ViewHeader
+        title="Scenario Comparison"
+        description="Compare Conservative, Base, and Flex scenarios — the Base scenario is recommended"
+      />
 
       <div style={{ display: 'flex', gap: theme.sp(5), flexWrap: 'wrap' }}>
         {scenarios.map(s => (

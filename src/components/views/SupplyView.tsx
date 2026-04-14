@@ -3,7 +3,8 @@ import { theme } from '../../theme';
 import { supplyEntries, supplySnapshot, utilizationTargets, geoSupplySummaries } from '../../data/supplyData';
 import { DataTable, Column } from '../shared/DataTable';
 import { FilterBar } from '../shared/FilterBar';
-import { KPICard } from '../shared/KPICard';
+import { SummaryBar } from '../shared/SummaryBar';
+import { ViewHeader } from '../shared/ViewHeader';
 import { StackedBarCard } from '../charts/StackedBarCard';
 import { PulseDot } from '../shared/PulseDot';
 import { useFilters } from '../../hooks/useFilters';
@@ -53,13 +54,19 @@ export const SupplyView: React.FC = () => {
   }));
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: theme.sp(5) }}>
-      <div style={{ display: 'flex', gap: theme.sp(4), flexWrap: 'wrap' }}>
-        <KPICard label="Total HC" value={formatNumber(supplySnapshot.totalHC)} accent={theme.primary} />
-        <KPICard label="Bench Rate" value={formatPercent(supplySnapshot.benchPercent)} delta={`${formatNumber(supplySnapshot.benchHC)} on bench`} deltaDirection="neutral" accent={theme.yellow} />
-        <KPICard label="Contractor %" value={formatPercent(supplySnapshot.contractorPercent)} delta={`${formatNumber(supplySnapshot.contractorHC)} contractors`} deltaDirection="neutral" accent={theme.orange} />
-        <KPICard label="Avg Utilization" value={formatPercent(supplySnapshot.avgUtilization)} delta="Target: 87.0%" deltaDirection={supplySnapshot.avgUtilization >= 87 ? 'up' : 'down'} accent={theme.green} />
-      </div>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: theme.sp(4) }}>
+      <ViewHeader
+        title="Supply Baseline"
+        description="Current workforce baseline — use filters to drill down by GEO, Practice, or JRS"
+        action={<PulseDot color={theme.green} label="Live sync" />}
+      />
+
+      <SummaryBar metrics={[
+        { label: 'Total HC', value: formatNumber(supplySnapshot.totalHC) },
+        { label: 'Bench', value: `${formatPercent(supplySnapshot.benchPercent)} (${formatNumber(supplySnapshot.benchHC)})`, color: theme.yellow },
+        { label: 'Utilization', value: formatPercent(supplySnapshot.avgUtilization), color: supplySnapshot.avgUtilization >= 87 ? theme.green : theme.yellow },
+        { label: 'Contractors', value: formatNumber(supplySnapshot.contractorHC) },
+      ]} />
 
       <FilterBar
         geoFilter={filters.geo} practiceFilter={filters.practice} jrsFilter={filters.jrs}
@@ -94,25 +101,7 @@ export const SupplyView: React.FC = () => {
         </div>
       </div>
 
-      <div>
-        <div style={{
-          fontSize: theme.fontSize.md, fontWeight: theme.fontWeight.semibold,
-          color: theme.text, marginBottom: theme.sp(3),
-        }}>
-          Supply Detail — JRS x Band
-        </div>
-        <DataTable columns={columns} data={filtered} keyExtractor={r => `${r.geo}-${r.jrs}-${r.band}-${r.laborPool}`} />
-      </div>
-
-      <div style={{
-        display: 'flex', alignItems: 'center', gap: theme.sp(2),
-        padding: theme.sp(3), borderTop: `1px solid ${theme.surfaceBorder}`,
-      }}>
-        <PulseDot color={theme.green} />
-        <span style={{ fontSize: theme.fontSize.xs, color: theme.textMuted, fontFamily: theme.fontMono }}>
-          Last refreshed: {new Date().toLocaleTimeString()} — Continuous sync from WF360, SCORE, SAP Fieldglass
-        </span>
-      </div>
+      <DataTable columns={columns} data={filtered} keyExtractor={r => `${r.geo}-${r.jrs}-${r.band}-${r.laborPool}`} />
     </div>
   );
 };

@@ -3,7 +3,6 @@ import { theme } from './theme';
 import { TabId } from './types/ibm';
 import { Header } from './components/layout/Header';
 import { TabBar } from './components/layout/TabBar';
-import { KPIBar } from './components/layout/KPIBar';
 import { AgentPipeline } from './components/pipeline/AgentPipeline';
 import { SupplyView } from './components/views/SupplyView';
 import { DemandView } from './components/views/DemandView';
@@ -88,7 +87,6 @@ function App() {
           </div>
         )}
 
-        <KPIBar />
         <TabBar activeTab={activeTab} onTabChange={setActiveTab} />
 
         <main style={{

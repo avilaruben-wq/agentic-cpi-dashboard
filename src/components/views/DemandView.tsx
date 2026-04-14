@@ -3,7 +3,8 @@ import { theme } from '../../theme';
 import { dealDemands, revenueImpliedDemands, demandDeltas } from '../../data/demandData';
 import { DataTable, Column } from '../shared/DataTable';
 import { FilterBar } from '../shared/FilterBar';
-import { KPICard } from '../shared/KPICard';
+import { SummaryBar } from '../shared/SummaryBar';
+import { ViewHeader } from '../shared/ViewHeader';
 import { BarChartCard } from '../charts/BarChartCard';
 import { DeltaChart } from '../charts/DeltaChart';
 import { SeverityBadge } from '../shared/SeverityBadge';
@@ -22,6 +23,7 @@ export const DemandView: React.FC = () => {
   const totalWeighted = filteredDeals.reduce((s, d) => s + d.weightedDemand, 0);
   const totalRaw = filteredDeals.reduce((s, d) => s + d.rawDemand, 0);
   const avgWinProb = filteredDeals.length ? filteredDeals.reduce((s, d) => s + d.winProbability, 0) / filteredDeals.length : 0;
+  const critDeltas = filteredDeltas.filter(d => d.severity === 'critical').length;
 
   const dealColumns: Column<DealDemand>[] = [
     { key: 'dealName', label: 'Deal', width: '200px' },
@@ -90,7 +92,6 @@ export const DemandView: React.FC = () => {
     transition: 'all 0.2s',
   });
 
-  // Top 10 JRS by weighted demand for chart
   const jrsDemand = Object.entries(
     filteredDeals.reduce<Record<string, number>>((acc, d) => {
       acc[d.jrs] = (acc[d.jrs] || 0) + d.weightedDemand;
@@ -105,19 +106,26 @@ export const DemandView: React.FC = () => {
   }));
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: theme.sp(5) }}>
-      <div style={{ display: 'flex', gap: theme.sp(4), flexWrap: 'wrap' }}>
-        <KPICard label="Raw Demand" value={formatNumber(totalRaw)} accent={theme.primary} />
-        <KPICard label="Weighted Demand" value={formatNumber(totalWeighted)} delta={`Avg win: ${formatPercent(avgWinProb * 100, 0)}`} deltaDirection="neutral" accent={theme.chart2} />
-        <KPICard label="Signed Deals" value={formatNumber(filteredDeals.filter(d => d.signed).length)} accent={theme.green} />
-        <KPICard label="Pipeline Deals" value={formatNumber(filteredDeals.filter(d => !d.signed).length)} delta="Unsigned — probability weighted" deltaDirection="neutral" accent={theme.yellow} />
-      </div>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: theme.sp(4) }}>
+      <ViewHeader
+        title="Demand Forecast"
+        description="Compare deal-backed demand against financial targets — toggle between views to analyze the pipeline"
+      />
+
+      <SummaryBar metrics={[
+        { label: 'Raw demand', value: formatNumber(totalRaw) },
+        { label: 'Weighted', value: formatNumber(totalWeighted), color: theme.primaryLight },
+        { label: 'Avg win rate', value: formatPercent(avgWinProb * 100, 0) },
+        { label: 'Signed', value: String(filteredDeals.filter(d => d.signed).length), color: theme.green },
+        { label: 'Pipeline', value: String(filteredDeals.filter(d => !d.signed).length), color: theme.yellow },
+        ...(critDeltas > 0 ? [{ label: 'Critical deltas', value: String(critDeltas), color: theme.red }] : []),
+      ]} />
 
       <div style={{ display: 'flex', gap: theme.sp(2), alignItems: 'center' }}>
         <button style={btnStyle(subView === 'bottomsUp')} onClick={() => setSubView('bottomsUp')}>Bottoms-Up</button>
         <button style={btnStyle(subView === 'topDown')} onClick={() => setSubView('topDown')}>Top-Down</button>
         <button style={btnStyle(subView === 'delta')} onClick={() => setSubView('delta')}>
-          Delta {filteredDeltas.filter(d => d.severity === 'critical').length > 0 && '●'}
+          Delta {critDeltas > 0 && '●'}
         </button>
       </div>
 

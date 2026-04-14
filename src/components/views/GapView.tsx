@@ -3,7 +3,8 @@ import { theme } from '../../theme';
 import { gapEntries, totalGapCount, totalRevenueAtRisk, critSitCount } from '../../data/gapData';
 import { DataTable, Column } from '../shared/DataTable';
 import { FilterBar } from '../shared/FilterBar';
-import { KPICard } from '../shared/KPICard';
+import { SummaryBar } from '../shared/SummaryBar';
+import { ViewHeader } from '../shared/ViewHeader';
 import { SeverityBadge } from '../shared/SeverityBadge';
 import { HeatmapTable } from '../charts/HeatmapTable';
 import { useFilters } from '../../hooks/useFilters';
@@ -39,7 +40,6 @@ const FulfillmentHierarchy: React.FC<{ plan: FulfillmentAction[] }> = ({ plan })
           padding: theme.sp(3),
           minWidth: '140px',
           flex: '1 1 140px',
-          position: 'relative',
         }}>
           <div style={{
             fontSize: theme.fontSize.xs, color: theme.textMuted,
@@ -78,11 +78,6 @@ export const GapView: React.FC = () => {
     ? (filtered.reduce((s, g) => s + g.severity.composite, 0) / filtered.length).toFixed(1)
     : '0';
 
-  const fillRate = filtered.length
-    ? ((1 - filtered.reduce((s, g) => s + g.gapCount, 0) / 18916) * 100).toFixed(1)
-    : '0';
-
-  // Heatmap data
   const jrsNames = [...new Set(filtered.map(g => g.jrs))];
   const bandGroups = ['B1-5', 'B6', 'B7-8', 'B9-10'];
   const heatData = jrsNames.map(jrs =>
@@ -112,27 +107,31 @@ export const GapView: React.FC = () => {
   ];
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: theme.sp(5) }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: theme.sp(4) }}>
+      <ViewHeader
+        title="Gap Register"
+        description="Staffing gaps ranked by severity — click any row to see the recommended fulfillment plan"
+      />
+
       {critSitCount > 0 && (
         <div style={{
           background: theme.redBg, border: `1px solid ${theme.red}40`,
-          borderRadius: theme.radius, padding: `${theme.sp(3)} ${theme.sp(4)}`,
+          borderRadius: theme.radius, padding: `${theme.sp(2)} ${theme.sp(3)}`,
           display: 'flex', alignItems: 'center', gap: theme.sp(2),
-          animation: 'fadeIn 0.3s ease',
         }}>
-          <span style={{ color: theme.red, fontSize: theme.fontSize.lg }}>⚠</span>
+          <span style={{ color: theme.red, fontSize: theme.fontSize.md }}>⚠</span>
           <span style={{ color: theme.red, fontWeight: theme.fontWeight.semibold, fontSize: theme.fontSize.sm }}>
             {critSitCount} CritSit gaps require immediate executive attention
           </span>
         </div>
       )}
 
-      <div style={{ display: 'flex', gap: theme.sp(4), flexWrap: 'wrap' }}>
-        <KPICard label="Total Gaps" value={formatNumber(totalGapCount)} accent={theme.red} />
-        <KPICard label="Revenue at Risk" value={formatCurrency(totalRevenueAtRisk)} accent={theme.orange} />
-        <KPICard label="Avg Severity" value={avgSeverity} delta="1-5 composite scale" deltaDirection="neutral" accent={theme.yellow} />
-        <KPICard label="Fill Rate" value={`${fillRate}%`} delta="Supply / Total Demand" deltaDirection="neutral" accent={theme.green} />
-      </div>
+      <SummaryBar metrics={[
+        { label: 'Total gaps', value: formatNumber(totalGapCount), color: theme.red },
+        { label: 'Revenue at risk', value: formatCurrency(totalRevenueAtRisk), color: theme.orange },
+        { label: 'Avg severity', value: avgSeverity },
+        { label: 'CritSits', value: String(critSitCount), color: critSitCount > 0 ? theme.red : theme.green },
+      ]} />
 
       <FilterBar
         geoFilter={filters.geo} practiceFilter={filters.practice} jrsFilter={filters.jrs}
@@ -141,7 +140,7 @@ export const GapView: React.FC = () => {
 
       {jrsNames.length > 0 && heatData.length > 0 && (
         <HeatmapTable
-          title="Gap Severity Heatmap — JRS x Band"
+          title="Gap Heatmap — JRS x Band"
           rows={jrsNames}
           columns={bandGroups}
           data={heatData}
@@ -149,25 +148,13 @@ export const GapView: React.FC = () => {
         />
       )}
 
-      <div>
-        <div style={{
-          fontSize: theme.fontSize.md, fontWeight: theme.fontWeight.semibold,
-          color: theme.text, marginBottom: theme.sp(3),
-        }}>
-          Gap Register — Click to expand fulfillment plan
-        </div>
-        <DataTable
-          columns={columns}
-          data={filtered}
-          keyExtractor={r => r.id}
-          expandable
-          renderExpanded={r => (
-            <div>
-              <FulfillmentHierarchy plan={r.fulfillmentPlan} />
-            </div>
-          )}
-        />
-      </div>
+      <DataTable
+        columns={columns}
+        data={filtered}
+        keyExtractor={r => r.id}
+        expandable
+        renderExpanded={r => <FulfillmentHierarchy plan={r.fulfillmentPlan} />}
+      />
     </div>
   );
 };

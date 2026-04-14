@@ -15,13 +15,41 @@ interface AgentNodeProps {
 export const AgentNode: React.FC<AgentNodeProps> = ({
   name, shortName, status, inputCount, outputCount, processingTime, compact,
 }) => {
-  const size = compact ? 48 : 80;
   const borderColor = status === 'complete' ? theme.pipelineComplete
     : status === 'processing' ? theme.pipelineActive
     : theme.pipelineIdle;
   const bgColor = status === 'complete' ? `${theme.pipelineComplete}20`
     : status === 'processing' ? `${theme.pipelineActive}20`
     : 'transparent';
+
+  // Ultra-compact: just a dot
+  if (compact) {
+    return (
+      <div style={{ display: 'flex', alignItems: 'center', gap: theme.sp(1) }}>
+        <div style={{
+          width: 10,
+          height: 10,
+          borderRadius: '50%',
+          background: status === 'complete' ? theme.pipelineComplete
+            : status === 'processing' ? theme.pipelineActive
+            : theme.pipelineIdle,
+          boxShadow: status === 'processing' ? `0 0 8px ${theme.pipelineGlow}` : 'none',
+          animation: status === 'processing' ? 'glow 1.5s ease-in-out infinite' : 'none',
+          transition: 'all 0.3s ease',
+        }} />
+        <span style={{
+          fontSize: theme.fontSize.xs,
+          color: status === 'idle' ? theme.textMuted : theme.textSecondary,
+          fontWeight: status === 'complete' ? theme.fontWeight.medium : theme.fontWeight.regular,
+        }}>
+          {shortName}
+        </span>
+      </div>
+    );
+  }
+
+  // Full size for pipeline tab
+  const size = 80;
   const icon = status === 'complete' ? '✓' : status === 'processing' ? '⟳' : '●';
 
   return (
@@ -29,7 +57,7 @@ export const AgentNode: React.FC<AgentNodeProps> = ({
       display: 'flex',
       flexDirection: 'column',
       alignItems: 'center',
-      gap: compact ? theme.sp(1) : theme.sp(2),
+      gap: theme.sp(2),
     }}>
       <div style={{
         width: size,
@@ -40,7 +68,7 @@ export const AgentNode: React.FC<AgentNodeProps> = ({
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        fontSize: compact ? theme.fontSize.md : theme.fontSize.xl,
+        fontSize: theme.fontSize.xl,
         color: borderColor,
         boxShadow: status === 'processing' ? `0 0 20px ${theme.pipelineGlow}` : 'none',
         animation: status === 'processing' ? 'glow 1.5s ease-in-out infinite' : 'none',
@@ -48,19 +76,15 @@ export const AgentNode: React.FC<AgentNodeProps> = ({
       }}>
         {icon}
       </div>
-      <div style={{
-        textAlign: 'center',
-        maxWidth: compact ? '80px' : '140px',
-      }}>
+      <div style={{ textAlign: 'center', maxWidth: '140px' }}>
         <div style={{
-          fontSize: compact ? theme.fontSize.xs : theme.fontSize.sm,
+          fontSize: theme.fontSize.sm,
           fontWeight: theme.fontWeight.semibold,
           color: theme.text,
-          whiteSpace: compact ? 'nowrap' : 'normal',
         }}>
-          {compact ? shortName : name}
+          {name}
         </div>
-        {!compact && status !== 'idle' && (
+        {status !== 'idle' && (
           <div style={{
             fontSize: theme.fontSize.xs,
             color: theme.textMuted,
