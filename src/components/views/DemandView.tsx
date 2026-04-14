@@ -5,6 +5,7 @@ import { DataTable, Column } from '../shared/DataTable';
 import { FilterBar } from '../shared/FilterBar';
 import { SummaryBar } from '../shared/SummaryBar';
 import { ViewHeader } from '../shared/ViewHeader';
+import { RunButton } from '../shared/RunButton';
 import { BarChartCard } from '../charts/BarChartCard';
 import { DeltaChart } from '../charts/DeltaChart';
 import { SeverityBadge } from '../shared/SeverityBadge';
@@ -12,7 +13,12 @@ import { useFilters } from '../../hooks/useFilters';
 import { formatNumber, formatPercent, formatDeltaPercent } from '../../utils/format';
 import { DealDemand, RevenueImpliedDemand, DemandDelta, DemandSubView } from '../../types/demand';
 
-export const DemandView: React.FC = () => {
+interface DemandViewProps {
+  isCompleted: boolean;
+  onComplete: () => void;
+}
+
+export const DemandView: React.FC<DemandViewProps> = ({ isCompleted, onComplete }) => {
   const [subView, setSubView] = useState<DemandSubView>('bottomsUp');
   const { filters, setGeo, setPractice, setJrs, reset, filterData } = useFilters();
 
@@ -108,65 +114,87 @@ export const DemandView: React.FC = () => {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: theme.sp(4) }}>
       <ViewHeader
-        title="Demand Forecast"
-        description="Compare deal-backed demand against financial targets — toggle between views to analyze the pipeline"
+        title="Step 2: Demand Forecast"
+        description="Ingest deal data, score by win/churn probability, and reconcile bottoms-up vs top-down demand."
+        action={
+          <RunButton
+            label="Run Demand Agent"
+            runningLabel="Analyzing deals..."
+            completedLabel="Demand Complete"
+            isCompleted={isCompleted}
+            onRun={onComplete}
+            duration={3000}
+          />
+        }
       />
 
-      <SummaryBar metrics={[
-        { label: 'Raw demand', value: formatNumber(totalRaw) },
-        { label: 'Weighted', value: formatNumber(totalWeighted), color: theme.primaryLight },
-        { label: 'Avg win rate', value: formatPercent(avgWinProb * 100, 0) },
-        { label: 'Signed', value: String(filteredDeals.filter(d => d.signed).length), color: theme.green },
-        { label: 'Pipeline', value: String(filteredDeals.filter(d => !d.signed).length), color: theme.yellow },
-        ...(critDeltas > 0 ? [{ label: 'Critical deltas', value: String(critDeltas), color: theme.red }] : []),
-      ]} />
-
-      <div style={{ display: 'flex', gap: theme.sp(2), alignItems: 'center' }}>
-        <button style={btnStyle(subView === 'bottomsUp')} onClick={() => setSubView('bottomsUp')}>Bottoms-Up</button>
-        <button style={btnStyle(subView === 'topDown')} onClick={() => setSubView('topDown')}>Top-Down</button>
-        <button style={btnStyle(subView === 'delta')} onClick={() => setSubView('delta')}>
-          Delta {critDeltas > 0 && '●'}
-        </button>
-      </div>
-
-      <FilterBar
-        geoFilter={filters.geo} practiceFilter={filters.practice} jrsFilter={filters.jrs}
-        onGeoChange={setGeo} onPracticeChange={setPractice} onJrsChange={setJrs} onReset={reset}
-      />
-
-      {subView === 'bottomsUp' && (
+      {isCompleted ? (
         <>
-          <BarChartCard
-            title="Top JRS by Weighted Demand"
-            subtitle="Deal-backed, scored by win probability"
-            data={jrsDemand}
-            xKey="jrs"
-            bars={[{ dataKey: 'demand', color: theme.chart1, name: 'Weighted HC' }]}
-            height={260}
-          />
-          <DataTable columns={dealColumns} data={filteredDeals} keyExtractor={r => r.id} />
-        </>
-      )}
+          <SummaryBar metrics={[
+            { label: 'Raw demand', value: formatNumber(totalRaw) },
+            { label: 'Weighted', value: formatNumber(totalWeighted), color: theme.primaryLight },
+            { label: 'Avg win rate', value: formatPercent(avgWinProb * 100, 0) },
+            { label: 'Signed', value: String(filteredDeals.filter(d => d.signed).length), color: theme.green },
+            { label: 'Pipeline', value: String(filteredDeals.filter(d => !d.signed).length), color: theme.yellow },
+            ...(critDeltas > 0 ? [{ label: 'Critical deltas', value: String(critDeltas), color: theme.red }] : []),
+          ]} />
 
-      {subView === 'topDown' && (
-        <DataTable columns={revenueColumns} data={filteredRevenue} keyExtractor={r => `${r.geo}-${r.jrs}-${r.band}`} />
-      )}
+          <div style={{ display: 'flex', gap: theme.sp(2), alignItems: 'center' }}>
+            <button style={btnStyle(subView === 'bottomsUp')} onClick={() => setSubView('bottomsUp')}>Bottoms-Up</button>
+            <button style={btnStyle(subView === 'topDown')} onClick={() => setSubView('topDown')}>Top-Down</button>
+            <button style={btnStyle(subView === 'delta')} onClick={() => setSubView('delta')}>
+              Delta {critDeltas > 0 && '●'}
+            </button>
+          </div>
 
-      {subView === 'delta' && (
-        <>
-          <DeltaChart title="Demand Delta — Bottoms-Up vs Top-Down" data={deltaChartData} />
-          <DataTable
-            columns={deltaColumns}
-            data={filteredDeltas}
-            keyExtractor={r => `${r.geo}-${r.jrs}-${r.band}`}
-            expandable
-            renderExpanded={r => (
-              <div style={{ padding: theme.sp(2), color: theme.textSecondary, fontSize: theme.fontSize.sm }}>
-                <strong style={{ color: theme.text }}>Analysis: </strong>{r.note}
-              </div>
-            )}
+          <FilterBar
+            geoFilter={filters.geo} practiceFilter={filters.practice} jrsFilter={filters.jrs}
+            onGeoChange={setGeo} onPracticeChange={setPractice} onJrsChange={setJrs} onReset={reset}
           />
+
+          {subView === 'bottomsUp' && (
+            <>
+              <BarChartCard
+                title="Top JRS by Weighted Demand"
+                subtitle="Deal-backed, scored by win probability"
+                data={jrsDemand}
+                xKey="jrs"
+                bars={[{ dataKey: 'demand', color: theme.chart1, name: 'Weighted HC' }]}
+                height={260}
+              />
+              <DataTable columns={dealColumns} data={filteredDeals} keyExtractor={r => r.id} />
+            </>
+          )}
+
+          {subView === 'topDown' && (
+            <DataTable columns={revenueColumns} data={filteredRevenue} keyExtractor={r => `${r.geo}-${r.jrs}-${r.band}`} />
+          )}
+
+          {subView === 'delta' && (
+            <>
+              <DeltaChart title="Demand Delta — Bottoms-Up vs Top-Down" data={deltaChartData} />
+              <DataTable
+                columns={deltaColumns}
+                data={filteredDeltas}
+                keyExtractor={r => `${r.geo}-${r.jrs}-${r.band}`}
+                expandable
+                renderExpanded={r => (
+                  <div style={{ padding: theme.sp(2), color: theme.textSecondary, fontSize: theme.fontSize.sm }}>
+                    <strong style={{ color: theme.text }}>Analysis: </strong>{r.note}
+                  </div>
+                )}
+              />
+            </>
+          )}
         </>
+      ) : (
+        <div style={{
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          padding: theme.sp(16), color: theme.textMuted, fontSize: theme.fontSize.md,
+          border: `1px dashed ${theme.surfaceBorder}`, borderRadius: theme.radiusLg,
+        }}>
+          Click "Run Demand Agent" to analyze deal pipeline and revenue forecasts
+        </div>
       )}
     </div>
   );

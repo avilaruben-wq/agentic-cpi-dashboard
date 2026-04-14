@@ -5,13 +5,18 @@ import { DataTable, Column } from '../shared/DataTable';
 import { FilterBar } from '../shared/FilterBar';
 import { SummaryBar } from '../shared/SummaryBar';
 import { ViewHeader } from '../shared/ViewHeader';
+import { RunButton } from '../shared/RunButton';
 import { StackedBarCard } from '../charts/StackedBarCard';
-import { PulseDot } from '../shared/PulseDot';
 import { useFilters } from '../../hooks/useFilters';
 import { formatNumber, formatPercent } from '../../utils/format';
 import { HeadcountEntry, UtilizationTarget } from '../../types/ibm';
 
-export const SupplyView: React.FC = () => {
+interface SupplyViewProps {
+  isCompleted: boolean;
+  onComplete: () => void;
+}
+
+export const SupplyView: React.FC<SupplyViewProps> = ({ isCompleted, onComplete }) => {
   const { filters, setGeo, setPractice, setJrs, reset, filterData } = useFilters();
 
   const filtered = filterData(
@@ -56,52 +61,68 @@ export const SupplyView: React.FC = () => {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: theme.sp(4) }}>
       <ViewHeader
-        title="Supply Baseline"
-        description="Current workforce baseline — use filters to drill down by GEO, Practice, or JRS"
-        action={<PulseDot color={theme.green} label="Live sync" />}
-      />
-
-      <SummaryBar metrics={[
-        { label: 'Total HC', value: formatNumber(supplySnapshot.totalHC) },
-        { label: 'Bench', value: `${formatPercent(supplySnapshot.benchPercent)} (${formatNumber(supplySnapshot.benchHC)})`, color: theme.yellow },
-        { label: 'Utilization', value: formatPercent(supplySnapshot.avgUtilization), color: supplySnapshot.avgUtilization >= 87 ? theme.green : theme.yellow },
-        { label: 'Contractors', value: formatNumber(supplySnapshot.contractorHC) },
-      ]} />
-
-      <FilterBar
-        geoFilter={filters.geo} practiceFilter={filters.practice} jrsFilter={filters.jrs}
-        onGeoChange={setGeo} onPracticeChange={setPractice} onJrsChange={setJrs} onReset={reset}
-      />
-
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: theme.sp(5) }}>
-        <StackedBarCard
-          title="Headcount by GEO"
-          data={chartData}
-          xKey="geo"
-          segments={[
-            { dataKey: 'Active', color: theme.chart1, name: 'Active' },
-            { dataKey: 'Bench', color: theme.chart5, name: 'Bench' },
-            { dataKey: 'Contractor', color: theme.chart4, name: 'Contractor' },
-          ]}
-          height={280}
-        />
-        <div>
-          <div style={{
-            fontSize: theme.fontSize.md, fontWeight: theme.fontWeight.semibold,
-            color: theme.text, marginBottom: theme.sp(3),
-          }}>
-            Utilization Targets by GEO
-          </div>
-          <DataTable
-            columns={utilColumns}
-            data={utilizationTargets}
-            keyExtractor={r => r.geo}
-            maxHeight="280px"
+        title="Step 1: Supply Baseline"
+        description="Ingest and reconcile headcount from WF360, SCORE, and SAP Fieldglass. Click Run to generate the supply baseline."
+        action={
+          <RunButton
+            label="Run Supply Agent"
+            runningLabel="Ingesting data..."
+            completedLabel="Supply Complete"
+            isCompleted={isCompleted}
+            onRun={onComplete}
+            duration={2000}
           />
-        </div>
-      </div>
+        }
+      />
 
-      <DataTable columns={columns} data={filtered} keyExtractor={r => `${r.geo}-${r.jrs}-${r.band}-${r.laborPool}`} />
+      {isCompleted ? (
+        <>
+          <SummaryBar metrics={[
+            { label: 'Total HC', value: formatNumber(supplySnapshot.totalHC) },
+            { label: 'Bench', value: `${formatPercent(supplySnapshot.benchPercent)} (${formatNumber(supplySnapshot.benchHC)})`, color: theme.yellow },
+            { label: 'Utilization', value: formatPercent(supplySnapshot.avgUtilization), color: supplySnapshot.avgUtilization >= 87 ? theme.green : theme.yellow },
+            { label: 'Contractors', value: formatNumber(supplySnapshot.contractorHC) },
+          ]} />
+
+          <FilterBar
+            geoFilter={filters.geo} practiceFilter={filters.practice} jrsFilter={filters.jrs}
+            onGeoChange={setGeo} onPracticeChange={setPractice} onJrsChange={setJrs} onReset={reset}
+          />
+
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: theme.sp(5) }}>
+            <StackedBarCard
+              title="Headcount by GEO"
+              data={chartData}
+              xKey="geo"
+              segments={[
+                { dataKey: 'Active', color: theme.chart1, name: 'Active' },
+                { dataKey: 'Bench', color: theme.chart5, name: 'Bench' },
+                { dataKey: 'Contractor', color: theme.chart4, name: 'Contractor' },
+              ]}
+              height={280}
+            />
+            <div>
+              <div style={{
+                fontSize: theme.fontSize.md, fontWeight: theme.fontWeight.semibold,
+                color: theme.text, marginBottom: theme.sp(3),
+              }}>
+                Utilization Targets by GEO
+              </div>
+              <DataTable columns={utilColumns} data={utilizationTargets} keyExtractor={r => r.geo} maxHeight="280px" />
+            </div>
+          </div>
+
+          <DataTable columns={columns} data={filtered} keyExtractor={r => `${r.geo}-${r.jrs}-${r.band}-${r.laborPool}`} />
+        </>
+      ) : (
+        <div style={{
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          padding: theme.sp(16), color: theme.textMuted, fontSize: theme.fontSize.md,
+          border: `1px dashed ${theme.surfaceBorder}`, borderRadius: theme.radiusLg,
+        }}>
+          Click "Run Supply Agent" to ingest and reconcile headcount data
+        </div>
+      )}
     </div>
   );
 };

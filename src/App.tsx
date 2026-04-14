@@ -1,15 +1,13 @@
-import { useState, useEffect } from 'react';
+import { useState, useCallback } from 'react';
 import { theme } from './theme';
 import { TabId } from './types/ibm';
 import { Header } from './components/layout/Header';
 import { TabBar } from './components/layout/TabBar';
-import { AgentPipeline } from './components/pipeline/AgentPipeline';
 import { SupplyView } from './components/views/SupplyView';
 import { DemandView } from './components/views/DemandView';
 import { GapView } from './components/views/GapView';
 import { ScenarioView } from './components/views/ScenarioView';
 import { OutputView } from './components/views/OutputView';
-import { useAgentPipeline } from './hooks/useAgentPipeline';
 
 const keyframes = `
   @keyframes pulse {
@@ -20,10 +18,6 @@ const keyframes = `
     0%, 100% { box-shadow: 0 0 8px ${theme.pipelineGlow}; }
     50% { box-shadow: 0 0 24px ${theme.pipelineGlow}, 0 0 48px ${theme.pipelineGlow}; }
   }
-  @keyframes flow {
-    from { stroke-dashoffset: 20; }
-    to { stroke-dashoffset: 0; }
-  }
   @keyframes fadeIn {
     from { opacity: 0; transform: translateY(8px); }
     to { opacity: 1; transform: translateY(0); }
@@ -32,19 +26,19 @@ const keyframes = `
 
 function App() {
   const [activeTab, setActiveTab] = useState<TabId>('supply');
-  const pipeline = useAgentPipeline();
+  const [completedTabs, setCompletedTabs] = useState<Set<TabId>>(new Set());
 
-  useEffect(() => {
-    pipeline.runPipeline();
+  const markComplete = useCallback((tabId: TabId) => {
+    setCompletedTabs(prev => new Set(prev).add(tabId));
   }, []);
 
   const renderView = () => {
     switch (activeTab) {
-      case 'supply': return <SupplyView />;
-      case 'demand': return <DemandView />;
-      case 'gaps': return <GapView />;
-      case 'scenarios': return <ScenarioView />;
-      case 'output': return <OutputView />;
+      case 'supply': return <SupplyView isCompleted={completedTabs.has('supply')} onComplete={() => markComplete('supply')} />;
+      case 'demand': return <DemandView isCompleted={completedTabs.has('demand')} onComplete={() => markComplete('demand')} />;
+      case 'gaps': return <GapView isCompleted={completedTabs.has('gaps')} onComplete={() => markComplete('gaps')} />;
+      case 'scenarios': return <ScenarioView isCompleted={completedTabs.has('scenarios')} onComplete={() => markComplete('scenarios')} />;
+      case 'output': return <OutputView isCompleted={completedTabs.has('output')} onComplete={() => markComplete('output')} />;
     }
   };
 
@@ -58,19 +52,7 @@ function App() {
         background: theme.bg,
       }}>
         <Header />
-
-        <div style={{
-          borderBottom: `1px solid ${theme.surfaceBorder}`,
-          background: theme.bg,
-          padding: `${theme.sp(2)} ${theme.sp(6)}`,
-        }}>
-          <AgentPipeline
-            agents={pipeline.agents}
-            compact
-          />
-        </div>
-
-        <TabBar activeTab={activeTab} onTabChange={setActiveTab} />
+        <TabBar activeTab={activeTab} onTabChange={setActiveTab} completedTabs={completedTabs} />
 
         <main style={{
           flex: 1,

@@ -3,8 +3,14 @@ import { theme } from '../../theme';
 import { scenarios } from '../../data/scenarioData';
 import { BarChartCard } from '../charts/BarChartCard';
 import { ViewHeader } from '../shared/ViewHeader';
+import { RunButton } from '../shared/RunButton';
 import { formatNumber, formatCurrency, formatPercent } from '../../utils/format';
 import { Scenario } from '../../types/scenario';
+
+interface ScenarioViewProps {
+  isCompleted: boolean;
+  onComplete: () => void;
+}
 
 const ScenarioCard: React.FC<{ scenario: Scenario; isBase?: boolean }> = ({ scenario, isBase }) => (
   <div style={{
@@ -86,7 +92,7 @@ const ScenarioCard: React.FC<{ scenario: Scenario; isBase?: boolean }> = ({ scen
   </div>
 );
 
-export const ScenarioView: React.FC = () => {
+export const ScenarioView: React.FC<ScenarioViewProps> = ({ isCompleted, onComplete }) => {
   const comparisonData = scenarios.map(s => ({
     name: s.label,
     Gap: s.totalGap,
@@ -102,36 +108,58 @@ export const ScenarioView: React.FC = () => {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: theme.sp(5) }}>
       <ViewHeader
-        title="Scenario Comparison"
-        description="Compare Conservative, Base, and Flex scenarios — the Base scenario is recommended"
+        title="Step 4: Scenarios"
+        description="Model conservative, base, and flex scenarios with cGP impact and budget tradeoffs."
+        action={
+          <RunButton
+            label="Run Scenario Model"
+            runningLabel="Modeling scenarios..."
+            completedLabel="Scenarios Complete"
+            isCompleted={isCompleted}
+            onRun={onComplete}
+            duration={2000}
+          />
+        }
       />
 
-      <div style={{ display: 'flex', gap: theme.sp(5), flexWrap: 'wrap' }}>
-        {scenarios.map(s => (
-          <ScenarioCard key={s.type} scenario={s} isBase={s.type === 'base'} />
-        ))}
-      </div>
+      {isCompleted ? (
+        <>
+          <div style={{ display: 'flex', gap: theme.sp(5), flexWrap: 'wrap' }}>
+            {scenarios.map(s => (
+              <ScenarioCard key={s.type} scenario={s} isBase={s.type === 'base'} />
+            ))}
+          </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: theme.sp(5) }}>
-        <BarChartCard
-          title="Gap Comparison by Scenario"
-          data={comparisonData}
-          xKey="name"
-          bars={[{ dataKey: 'Gap', color: theme.red, name: 'Gap (HC)' }]}
-          height={250}
-        />
-        <BarChartCard
-          title="Budget Allocation ($M)"
-          data={budgetData}
-          xKey="name"
-          bars={[
-            { dataKey: 'Hiring', color: theme.chart1, name: 'Hiring ($M)' },
-            { dataKey: 'SubK', color: theme.chart4, name: 'SubK ($M)' },
-          ]}
-          height={250}
-          stacked
-        />
-      </div>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: theme.sp(5) }}>
+            <BarChartCard
+              title="Gap Comparison by Scenario"
+              data={comparisonData}
+              xKey="name"
+              bars={[{ dataKey: 'Gap', color: theme.red, name: 'Gap (HC)' }]}
+              height={250}
+            />
+            <BarChartCard
+              title="Budget Allocation ($M)"
+              data={budgetData}
+              xKey="name"
+              bars={[
+                { dataKey: 'Hiring', color: theme.chart1, name: 'Hiring ($M)' },
+                { dataKey: 'SubK', color: theme.chart4, name: 'SubK ($M)' },
+              ]}
+              height={250}
+              stacked
+            />
+          </div>
+        </>
+      ) : (
+        <div style={{
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          padding: theme.sp(16), color: theme.textMuted, fontSize: theme.fontSize.md,
+          border: `1px dashed ${theme.surfaceBorder}`, borderRadius: theme.radiusLg,
+        }}>
+          Click "Run Scenario Model" to generate conservative, base, and flex scenarios
+        </div>
+      )}
     </div>
   );
 };
