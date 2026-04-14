@@ -14,7 +14,7 @@ import { useFilters } from '../../hooks/useFilters';
 import { formatNumber, formatCurrency, formatPercent } from '../../utils/format';
 import { severityLabel } from '../../utils/calculations';
 import { GapEntry, FulfillmentAction } from '../../types/gap';
-import { Scenario } from '../../types/scenario';
+import { Scenario, ScenarioType } from '../../types/scenario';
 import { FULFILLMENT_STEP_LABELS } from '../../data/constants';
 
 interface Agent3ViewProps {
@@ -64,19 +64,33 @@ const FulfillmentHierarchy: React.FC<{ plan: FulfillmentAction[] }> = ({ plan })
   </div>
 );
 
-const ScenarioCard: React.FC<{ scenario: Scenario; isBase?: boolean }> = ({ scenario, isBase }) => (
-  <div style={{
-    background: theme.surface, border: `1px solid ${isBase ? theme.primary : theme.surfaceBorder}`,
-    borderRadius: theme.radius, padding: theme.sp(4), flex: '1 1 250px',
-    boxShadow: isBase ? theme.shadowGlow : 'none', position: 'relative',
-  }}>
-    {isBase && (
-      <span style={{
-        position: 'absolute', top: theme.sp(2), right: theme.sp(2),
-        background: theme.primary, color: '#fff', padding: '2px 8px',
-        borderRadius: theme.radiusSm, fontSize: '10px', fontWeight: 600,
-      }}>RECOMMENDED</span>
-    )}
+const ScenarioCard: React.FC<{
+  scenario: Scenario; isBase?: boolean; isSelected: boolean; onSelect: () => void;
+}> = ({ scenario, isBase, isSelected, onSelect }) => (
+  <div
+    onClick={onSelect}
+    style={{
+      background: theme.surface,
+      border: `2px solid ${isSelected ? '#198038' : isBase ? theme.primary : theme.surfaceBorder}`,
+      borderRadius: theme.radius, padding: theme.sp(4), flex: '1 1 250px',
+      boxShadow: isSelected ? '0 0 0 3px rgba(25,128,56,0.15)' : isBase ? theme.shadowGlow : 'none',
+      position: 'relative', cursor: 'pointer', transition: 'all 0.15s',
+    }}
+  >
+    <div style={{ display: 'flex', gap: theme.sp(1), position: 'absolute', top: theme.sp(2), right: theme.sp(2) }}>
+      {isBase && !isSelected && (
+        <span style={{
+          background: theme.primary, color: '#fff', padding: '2px 8px',
+          borderRadius: theme.radiusSm, fontSize: '10px', fontWeight: 600,
+        }}>RECOMMENDED</span>
+      )}
+      {isSelected && (
+        <span style={{
+          background: '#198038', color: '#fff', padding: '2px 8px',
+          borderRadius: theme.radiusSm, fontSize: '10px', fontWeight: 600,
+        }}>✓ SELECTED</span>
+      )}
+    </div>
     <div style={{ fontSize: theme.fontSize.base, fontWeight: theme.fontWeight.semibold, color: theme.text }}>{scenario.label}</div>
     <div style={{ fontSize: theme.fontSize.xs, color: theme.textMuted, margin: `${theme.sp(1)} 0 ${theme.sp(3)}`, lineHeight: 1.5 }}>{scenario.description}</div>
     {[
@@ -91,11 +105,19 @@ const ScenarioCard: React.FC<{ scenario: Scenario; isBase?: boolean }> = ({ scen
         <span style={{ fontFamily: theme.fontMono, fontWeight: theme.fontWeight.medium, color: item.c || theme.text }}>{item.v}</span>
       </div>
     ))}
+    {!isSelected && (
+      <div style={{ marginTop: theme.sp(3), textAlign: 'center' }}>
+        <span style={{ fontSize: theme.fontSize.xs, color: theme.primary, fontWeight: theme.fontWeight.medium }}>
+          Click to select this scenario
+        </span>
+      </div>
+    )}
   </div>
 );
 
 export const Agent3View: React.FC<Agent3ViewProps> = ({ agentState, onStateChange }) => {
   const [section, setSection] = useState<Section>('gaps');
+  const [selectedScenario, setSelectedScenario] = useState<ScenarioType | null>(null);
   const { filters, setGeo, setPractice, setJrs, reset, filterData } = useFilters();
   const filtered = filterData(gapEntries, g => g.geo, g => g.practice, g => g.jrs);
 
@@ -203,9 +225,32 @@ export const Agent3View: React.FC<Agent3ViewProps> = ({ agentState, onStateChang
 
           {section === 'scenarios' && (
             <>
-              <div style={{ display: 'flex', gap: theme.sp(4), flexWrap: 'wrap' }}>
-                {scenarios.map(s => <ScenarioCard key={s.type} scenario={s} isBase={s.type === 'base'} />)}
+              <div style={{ fontSize: theme.fontSize.sm, color: theme.textSecondary, marginBottom: theme.sp(1) }}>
+                Select a scenario to proceed with. Click a card to choose.
               </div>
+              <div style={{ display: 'flex', gap: theme.sp(4), flexWrap: 'wrap' }}>
+                {scenarios.map(s => (
+                  <ScenarioCard
+                    key={s.type}
+                    scenario={s}
+                    isBase={s.type === 'base'}
+                    isSelected={selectedScenario === s.type}
+                    onSelect={() => setSelectedScenario(s.type)}
+                  />
+                ))}
+              </div>
+
+              {selectedScenario && (
+                <div style={{
+                  padding: theme.sp(3), background: '#defbe6', border: '1px solid #19803830',
+                  borderRadius: theme.radius, display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                }}>
+                  <span style={{ fontSize: theme.fontSize.sm, color: '#198038', fontWeight: theme.fontWeight.medium }}>
+                    ✓ <strong>{scenarios.find(s => s.type === selectedScenario)?.label}</strong> scenario selected — this will be used for the DI Authorization Letter and SCORE plan
+                  </span>
+                </div>
+              )}
+
               <BarChartCard title="Budget Allocation ($M)" data={budgetData} xKey="name"
                 bars={[
                   { dataKey: 'Hiring', color: theme.chart1, name: 'Hiring ($M)' },
