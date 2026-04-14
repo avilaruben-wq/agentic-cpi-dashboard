@@ -32,4 +32,12 @@ export interface UtilizationTarget {
   delta: number;
 }
 
-export type TabId = 'supply' | 'demand' | 'gaps' | 'scenarios' | 'output';
+export type TabId = 'agent1' | 'agent2' | 'agent3' | 'approve';
+
+export type AgentState = 'locked' | 'ready' | 'running' | 'review' | 'approved';
+
+export interface SubStep {
+  id: string;
+  label: string;
+  isHumanReview?: boolean;
+}

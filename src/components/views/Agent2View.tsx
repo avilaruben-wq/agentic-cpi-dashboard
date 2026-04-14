@@ -1,0 +1,182 @@
+import React, { useState } from 'react';
+import { theme } from '../../theme';
+import { AgentState, SubStep } from '../../types/ibm';
+import { dealDemands, revenueImpliedDemands, demandDeltas } from '../../data/demandData';
+import { DataTable, Column } from '../shared/DataTable';
+import { FilterBar } from '../shared/FilterBar';
+import { SummaryBar } from '../shared/SummaryBar';
+import { SubStepProgress } from '../shared/SubStepProgress';
+import { BarChartCard } from '../charts/BarChartCard';
+import { DeltaChart } from '../charts/DeltaChart';
+import { SeverityBadge } from '../shared/SeverityBadge';
+import { useFilters } from '../../hooks/useFilters';
+import { formatNumber, formatPercent } from '../../utils/format';
+import { DealDemand, RevenueImpliedDemand, DemandDelta, DemandSubView } from '../../types/demand';
+
+interface Agent2ViewProps {
+  agentState: AgentState;
+  onStateChange: (s: AgentState) => void;
+}
+
+const subSteps: SubStep[] = [
+  { id: '2.1', label: 'Ingest deal data from Certinia, Salesforce/IPPF, solutioning models, Finance revenue commit' },
+  { id: '2.2', label: 'Apply Certinia win-probability scores; filter pipeline to high-confidence demand' },
+  { id: '2.3', label: 'Translate demand into bottoms-up capacity view by JRS x band x labor pool' },
+  { id: '2.4', label: 'Translate revenue commit into top-down view using historical HC conversion ratios' },
+  { id: '2.5', label: 'Reconcile bottoms-up vs top-down demand; surface the delta' },
+  { id: '2.6', label: 'Generate demand report — bottoms-up demand, delta vs financial targets' },
+  { id: '2.7', label: 'GEO Lead reviews demand report; resolves discrepancies; confirms demand picture', isHumanReview: true },
+];
+
+export const Agent2View: React.FC<Agent2ViewProps> = ({ agentState, onStateChange }) => {
+  const [subView, setSubView] = useState<DemandSubView>('bottomsUp');
+  const { filters, setGeo, setPractice, setJrs, reset, filterData } = useFilters();
+
+  const filteredDeals = filterData(dealDemands, d => d.geo, d => d.practice, d => d.jrs);
+  const filteredRevenue = filterData(revenueImpliedDemands, d => d.geo, d => d.practice, d => d.jrs);
+  const filteredDeltas = filterData(demandDeltas, d => d.geo, d => d.practice, d => d.jrs);
+
+  const totalWeighted = filteredDeals.reduce((s, d) => s + d.weightedDemand, 0);
+  const totalRaw = filteredDeals.reduce((s, d) => s + d.rawDemand, 0);
+  const avgWinProb = filteredDeals.length ? filteredDeals.reduce((s, d) => s + d.winProbability, 0) / filteredDeals.length : 0;
+  const critDeltas = filteredDeltas.filter(d => d.severity === 'critical').length;
+
+  const showResults = agentState === 'review' || agentState === 'approved';
+
+  const dealColumns: Column<DealDemand>[] = [
+    { key: 'dealName', label: 'Deal', width: '200px' },
+    { key: 'client', label: 'Client', width: '120px' },
+    { key: 'geo', label: 'GEO', width: '80px' },
+    { key: 'jrs', label: 'JRS', width: '200px' },
+    { key: 'band', label: 'Band', width: '70px', align: 'center' },
+    { key: 'rawDemand', label: 'Raw', align: 'right', render: r => formatNumber(r.rawDemand), getValue: r => r.rawDemand },
+    { key: 'winProbability', label: 'Win %', align: 'right', render: r => formatPercent(r.winProbability * 100, 0), getValue: r => r.winProbability },
+    { key: 'weightedDemand', label: 'Weighted', align: 'right', render: r => (
+      <span style={{ fontWeight: theme.fontWeight.semibold, color: theme.primary }}>{formatNumber(r.weightedDemand)}</span>
+    ), getValue: r => r.weightedDemand },
+    { key: 'signed', label: 'Status', align: 'center', render: r => (
+      <span style={{
+        padding: '2px 8px', borderRadius: theme.radiusSm,
+        background: r.signed ? theme.greenBg : theme.yellowBg,
+        color: r.signed ? theme.green : theme.yellow,
+        fontSize: theme.fontSize.xs, fontWeight: theme.fontWeight.medium,
+      }}>
+        {r.signed ? 'Signed' : 'Pipeline'}
+      </span>
+    ) },
+  ];
+
+  const revenueColumns: Column<RevenueImpliedDemand>[] = [
+    { key: 'geo', label: 'GEO', width: '90px' },
+    { key: 'jrs', label: 'JRS', width: '250px' },
+    { key: 'band', label: 'Band', width: '70px', align: 'center' },
+    { key: 'revenueCommit', label: 'Revenue Commit', align: 'right', render: r => `$${(r.revenueCommit / 1e6).toFixed(1)}M`, getValue: r => r.revenueCommit },
+    { key: 'impliedHC', label: 'Implied HC', align: 'right', render: r => (
+      <span style={{ fontWeight: theme.fontWeight.semibold }}>{formatNumber(r.impliedHC)}</span>
+    ), getValue: r => r.impliedHC },
+    { key: 'conversionRatio', label: 'HC/$M', align: 'right', render: r => r.conversionRatio.toFixed(2), getValue: r => r.conversionRatio },
+  ];
+
+  const deltaColumns: Column<DemandDelta>[] = [
+    { key: 'geo', label: 'GEO', width: '90px' },
+    { key: 'jrs', label: 'JRS', width: '220px' },
+    { key: 'band', label: 'Band', width: '70px', align: 'center' },
+    { key: 'bottomsUpDemand', label: 'Bottoms-Up', align: 'right', render: r => formatNumber(r.bottomsUpDemand), getValue: r => r.bottomsUpDemand },
+    { key: 'topDownDemand', label: 'Top-Down', align: 'right', render: r => formatNumber(r.topDownDemand), getValue: r => r.topDownDemand },
+    { key: 'delta', label: 'Delta', align: 'right', render: r => (
+      <span style={{ color: r.delta < -15 ? theme.red : r.delta < -5 ? theme.orange : theme.yellow, fontWeight: theme.fontWeight.semibold }}>
+        {formatNumber(r.delta)}
+      </span>
+    ), getValue: r => r.delta },
+    { key: 'severity', label: 'Severity', align: 'center', render: r => <SeverityBadge level={r.severity} /> },
+  ];
+
+  const btnStyle = (active: boolean): React.CSSProperties => ({
+    background: active ? theme.primary : theme.surface,
+    border: `1px solid ${active ? theme.primary : theme.surfaceBorder}`,
+    color: active ? '#fff' : theme.textSecondary,
+    padding: `0 ${theme.sp(4)}`, borderRadius: theme.radius,
+    fontSize: theme.fontSize.sm, fontWeight: active ? theme.fontWeight.semibold : theme.fontWeight.regular,
+    cursor: 'pointer', fontFamily: 'inherit', height: '32px',
+  });
+
+  const jrsDemand = Object.entries(
+    filteredDeals.reduce<Record<string, number>>((acc, d) => { acc[d.jrs] = (acc[d.jrs] || 0) + d.weightedDemand; return acc; }, {})
+  ).sort((a, b) => b[1] - a[1]).slice(0, 8).map(([jrs, demand]) => ({
+    jrs: jrs.replace(/^(App |Data |Quality |Solution |Site Reliability |Test |Project |Business |Cybersecurity )/, ''), demand,
+  }));
+
+  const deltaChartData = filteredDeltas.map(d => ({
+    name: `${d.geo} — ${d.jrs.split('-')[0]}`, delta: d.delta, severity: d.severity,
+  }));
+
+  if (agentState === 'locked') {
+    return (
+      <div style={{
+        display: 'flex', alignItems: 'center', justifyContent: 'center', padding: theme.sp(16),
+        color: theme.textMuted, fontSize: theme.fontSize.md, background: theme.surface,
+        border: `1px dashed ${theme.surfaceBorder}`, borderRadius: theme.radius,
+      }}>
+        🔒 Complete and approve the Supply Baseline Agent first
+      </div>
+    );
+  }
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: theme.sp(4) }}>
+      <SubStepProgress
+        steps={subSteps}
+        agentState={agentState as any}
+        onRun={() => onStateChange('running')}
+        onAllAutoComplete={() => onStateChange('review')}
+        onApprove={() => onStateChange('approved')}
+        runLabel="Run Demand Forecast Agent"
+        agentName="Demand Forecast Agent"
+        agentDescription="Ingests deal data from GreenSTAR/Certinia, scores by win/churn probability, and reconciles bottoms-up deal-backed demand against top-down revenue-implied demand to surface the delta."
+      />
+
+      {showResults && (
+        <>
+          <SummaryBar metrics={[
+            { label: 'Raw demand', value: formatNumber(totalRaw) },
+            { label: 'Weighted', value: formatNumber(totalWeighted), color: theme.primary },
+            { label: 'Avg win rate', value: formatPercent(avgWinProb * 100, 0) },
+            { label: 'Signed', value: String(filteredDeals.filter(d => d.signed).length), color: theme.green },
+            ...(critDeltas > 0 ? [{ label: 'Critical deltas', value: String(critDeltas), color: theme.red }] : []),
+          ]} />
+
+          <div style={{ display: 'flex', gap: theme.sp(2) }}>
+            <button style={btnStyle(subView === 'bottomsUp')} onClick={() => setSubView('bottomsUp')}>Bottoms-Up</button>
+            <button style={btnStyle(subView === 'topDown')} onClick={() => setSubView('topDown')}>Top-Down</button>
+            <button style={btnStyle(subView === 'delta')} onClick={() => setSubView('delta')}>Delta {critDeltas > 0 && '●'}</button>
+          </div>
+
+          <FilterBar geoFilter={filters.geo} practiceFilter={filters.practice} jrsFilter={filters.jrs}
+            onGeoChange={setGeo} onPracticeChange={setPractice} onJrsChange={setJrs} onReset={reset} />
+
+          {subView === 'bottomsUp' && (
+            <>
+              <BarChartCard title="Top JRS by Weighted Demand" subtitle="Deal-backed, scored by win probability"
+                data={jrsDemand} xKey="jrs" bars={[{ dataKey: 'demand', color: theme.chart1, name: 'Weighted HC' }]} height={260} />
+              <DataTable columns={dealColumns} data={filteredDeals} keyExtractor={r => r.id} />
+            </>
+          )}
+          {subView === 'topDown' && (
+            <DataTable columns={revenueColumns} data={filteredRevenue} keyExtractor={r => `${r.geo}-${r.jrs}-${r.band}`} />
+          )}
+          {subView === 'delta' && (
+            <>
+              <DeltaChart title="Demand Delta — Bottoms-Up vs Top-Down" data={deltaChartData} />
+              <DataTable columns={deltaColumns} data={filteredDeltas} keyExtractor={r => `${r.geo}-${r.jrs}-${r.band}`}
+                expandable renderExpanded={r => (
+                  <div style={{ padding: theme.sp(2), color: theme.textSecondary, fontSize: theme.fontSize.sm }}>
+                    <strong style={{ color: theme.text }}>Analysis: </strong>{r.note}
+                  </div>
+                )} />
+            </>
+          )}
+        </>
+      )}
+    </div>
+  );
+};

@@ -1,22 +1,17 @@
 import { useState, useCallback } from 'react';
 import { theme } from './theme';
-import { TabId } from './types/ibm';
+import { TabId, AgentState } from './types/ibm';
 import { Header } from './components/layout/Header';
 import { TabBar } from './components/layout/TabBar';
-import { SupplyView } from './components/views/SupplyView';
-import { DemandView } from './components/views/DemandView';
-import { GapView } from './components/views/GapView';
-import { ScenarioView } from './components/views/ScenarioView';
-import { OutputView } from './components/views/OutputView';
+import { Agent1View } from './components/views/Agent1View';
+import { Agent2View } from './components/views/Agent2View';
+import { Agent3View } from './components/views/Agent3View';
+import { ApproveView } from './components/views/ApproveView';
 
 const keyframes = `
   @keyframes pulse {
     0%, 100% { opacity: 1; }
     50% { opacity: 0.4; }
-  }
-  @keyframes glow {
-    0%, 100% { box-shadow: 0 0 8px ${theme.pipelineGlow}; }
-    50% { box-shadow: 0 0 24px ${theme.pipelineGlow}, 0 0 48px ${theme.pipelineGlow}; }
   }
   @keyframes fadeIn {
     from { opacity: 0; transform: translateY(8px); }
@@ -25,20 +20,53 @@ const keyframes = `
 `;
 
 function App() {
-  const [activeTab, setActiveTab] = useState<TabId>('supply');
-  const [completedTabs, setCompletedTabs] = useState<Set<TabId>>(new Set());
+  const [activeTab, setActiveTab] = useState<TabId>('agent1');
+  const [agentStates, setAgentStates] = useState<Record<TabId, AgentState>>({
+    agent1: 'ready',
+    agent2: 'locked',
+    agent3: 'locked',
+    approve: 'locked',
+  });
 
-  const markComplete = useCallback((tabId: TabId) => {
-    setCompletedTabs(prev => new Set(prev).add(tabId));
+  const setAgentState = useCallback((tabId: TabId, state: AgentState) => {
+    setAgentStates(prev => {
+      const next = { ...prev, [tabId]: state };
+      // Unlock the next agent when current is approved
+      if (state === 'approved') {
+        if (tabId === 'agent1' && next.agent2 === 'locked') next.agent2 = 'ready';
+        if (tabId === 'agent2' && next.agent3 === 'locked') next.agent3 = 'ready';
+        if (tabId === 'agent3' && next.approve === 'locked') next.approve = 'ready';
+      }
+      return next;
+    });
   }, []);
 
   const renderView = () => {
     switch (activeTab) {
-      case 'supply': return <SupplyView isCompleted={completedTabs.has('supply')} onComplete={() => markComplete('supply')} />;
-      case 'demand': return <DemandView isCompleted={completedTabs.has('demand')} onComplete={() => markComplete('demand')} />;
-      case 'gaps': return <GapView isCompleted={completedTabs.has('gaps')} onComplete={() => markComplete('gaps')} />;
-      case 'scenarios': return <ScenarioView isCompleted={completedTabs.has('scenarios')} onComplete={() => markComplete('scenarios')} />;
-      case 'output': return <OutputView isCompleted={completedTabs.has('output')} onComplete={() => markComplete('output')} />;
+      case 'agent1': return (
+        <Agent1View
+          agentState={agentStates.agent1}
+          onStateChange={(s) => setAgentState('agent1', s)}
+        />
+      );
+      case 'agent2': return (
+        <Agent2View
+          agentState={agentStates.agent2}
+          onStateChange={(s) => setAgentState('agent2', s)}
+        />
+      );
+      case 'agent3': return (
+        <Agent3View
+          agentState={agentStates.agent3}
+          onStateChange={(s) => setAgentState('agent3', s)}
+        />
+      );
+      case 'approve': return (
+        <ApproveView
+          agentState={agentStates.approve}
+          onStateChange={(s) => setAgentState('approve', s)}
+        />
+      );
     }
   };
 
@@ -52,8 +80,7 @@ function App() {
         background: theme.bg,
       }}>
         <Header />
-        <TabBar activeTab={activeTab} onTabChange={setActiveTab} completedTabs={completedTabs} />
-
+        <TabBar activeTab={activeTab} onTabChange={setActiveTab} agentStates={agentStates} />
         <main style={{
           flex: 1,
           padding: `${theme.sp(5)} ${theme.sp(6)}`,
