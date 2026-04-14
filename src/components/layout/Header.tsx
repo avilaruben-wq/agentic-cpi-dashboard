@@ -1,53 +1,39 @@
 import React from 'react';
 import { theme } from '../../theme';
-import { PulseDot } from '../shared/PulseDot';
 
 export const Header: React.FC = () => (
   <header style={{
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'space-between',
-    padding: `${theme.sp(4)} ${theme.sp(6)}`,
-    borderBottom: `1px solid ${theme.surfaceBorder}`,
-    background: theme.surface,
+    padding: `0 ${theme.sp(4)}`,
+    height: '48px',
+    background: theme.headerBg,
+    color: theme.headerText,
   }}>
-    <div style={{ display: 'flex', alignItems: 'center', gap: theme.sp(3) }}>
+    <div style={{ display: 'flex', alignItems: 'center', gap: theme.sp(3), height: '100%' }}>
       <div style={{
-        width: 36, height: 36, borderRadius: theme.radius,
-        background: theme.primary, display: 'flex',
-        alignItems: 'center', justifyContent: 'center',
-        fontSize: theme.fontSize.md, fontWeight: theme.fontWeight.bold,
-        color: '#fff',
+        fontSize: theme.fontSize.base,
+        fontWeight: theme.fontWeight.semibold,
+        letterSpacing: '0.1px',
+        display: 'flex',
+        alignItems: 'center',
+        gap: theme.sp(2),
       }}>
-        CPI
-      </div>
-      <div>
-        <div style={{
-          fontSize: theme.fontSize.lg,
-          fontWeight: theme.fontWeight.bold,
-          color: theme.text,
-          letterSpacing: '-0.3px',
-        }}>
-          Agentic CPI
-        </div>
-        <div style={{
-          fontSize: theme.fontSize.xs,
-          color: theme.textMuted,
-          letterSpacing: '0.3px',
-        }}>
-          Capacity Planning Intelligence — IBM Consulting
-        </div>
+        <span style={{ opacity: 0.7 }}>IBM</span>
+        <span style={{ fontWeight: theme.fontWeight.regular }}>watsonx Orchestrate</span>
+        <span style={{ color: '#6f6f6f', margin: `0 ${theme.sp(1)}` }}>|</span>
+        <span style={{ fontWeight: theme.fontWeight.semibold }}>Agentic CPI</span>
       </div>
     </div>
     <div style={{ display: 'flex', alignItems: 'center', gap: theme.sp(4) }}>
-      <PulseDot color={theme.green} label="Live — Continuous Refresh" />
-      <div style={{
-        fontSize: theme.fontSize.xs,
-        color: theme.textMuted,
+      <span style={{
+        fontSize: theme.fontSize.sm,
+        color: '#c6c6c6',
         fontFamily: theme.fontMono,
       }}>
         Q3 2026
-      </div>
+      </span>
     </div>
   </header>
 );

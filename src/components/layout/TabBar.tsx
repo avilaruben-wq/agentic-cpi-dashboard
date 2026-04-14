@@ -20,58 +20,44 @@ export const TabBar: React.FC<TabBarProps> = ({ activeTab, onTabChange, complete
   <nav style={{
     display: 'flex',
     alignItems: 'stretch',
-    padding: `0 ${theme.sp(6)}`,
-    background: theme.bg,
-    gap: 0,
+    background: theme.surface,
     borderBottom: `1px solid ${theme.surfaceBorder}`,
+    padding: `0 ${theme.sp(4)}`,
   }}>
     {tabs.map((tab, idx) => {
       const isActive = activeTab === tab.id;
       const isCompleted = completedTabs.has(tab.id);
       const isLast = idx === tabs.length - 1;
 
-      const bg = isActive ? theme.primary
-        : isCompleted ? `${theme.green}18`
-        : 'transparent';
-      const textColor = isActive ? '#fff'
-        : isCompleted ? theme.green
-        : theme.textMuted;
-      const numberBg = isActive ? 'rgba(255,255,255,0.2)'
-        : isCompleted ? `${theme.green}30`
-        : theme.surfaceBorder;
-      const numberColor = isActive ? '#fff'
-        : isCompleted ? theme.green
-        : theme.textMuted;
-
       return (
         <button
           key={tab.id}
           onClick={() => onTabChange(tab.id)}
           style={{
-            background: bg,
+            background: isActive ? theme.primaryMuted : 'transparent',
             border: 'none',
             borderBottom: isActive ? `2px solid ${theme.primary}` : '2px solid transparent',
-            color: textColor,
+            color: isActive ? theme.primary : isCompleted ? theme.green : theme.textSecondary,
             padding: `${theme.sp(3)} ${theme.sp(5)}`,
-            paddingRight: isLast ? theme.sp(5) : theme.sp(7),
             fontSize: theme.fontSize.base,
-            fontWeight: isActive ? theme.fontWeight.semibold : theme.fontWeight.medium,
+            fontWeight: isActive ? theme.fontWeight.semibold : theme.fontWeight.regular,
             cursor: 'pointer',
             fontFamily: 'inherit',
             display: 'flex',
             alignItems: 'center',
             gap: theme.sp(2),
-            transition: 'all 0.2s',
+            transition: 'all 0.15s',
             position: 'relative',
           }}
         >
-          {/* Step number circle */}
           <span style={{
-            width: 24,
-            height: 24,
+            width: 22,
+            height: 22,
             borderRadius: '50%',
-            background: numberBg,
-            color: numberColor,
+            background: isActive ? theme.primary
+              : isCompleted ? theme.green
+              : theme.surfaceBorder,
+            color: isActive || isCompleted ? '#fff' : theme.textMuted,
             display: 'inline-flex',
             alignItems: 'center',
             justifyContent: 'center',
@@ -84,19 +70,14 @@ export const TabBar: React.FC<TabBarProps> = ({ activeTab, onTabChange, complete
 
           {tab.label}
 
-          {/* Chevron arrow */}
           {!isLast && (
             <span style={{
-              position: 'absolute',
-              right: 0,
-              top: '50%',
-              transform: 'translateY(-50%)',
-              color: isActive ? theme.primaryLight : theme.surfaceBorder,
+              marginLeft: theme.sp(2),
+              color: theme.surfaceBorder,
               fontSize: theme.fontSize.md,
-              lineHeight: 1,
-              pointerEvents: 'none',
+              fontWeight: theme.fontWeight.light,
             }}>
-              ›
+              /
             </span>
           )}
         </button>

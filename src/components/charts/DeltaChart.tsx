@@ -13,18 +13,18 @@ export const DeltaChart: React.FC<DeltaChartProps> = ({ title, data, height = 35
     background: theme.surface,
     border: `1px solid ${theme.surfaceBorder}`,
     borderLeft: `3px solid ${theme.primary}`,
-    borderRadius: theme.radiusLg,
-    padding: theme.sp(5),
+    borderRadius: theme.radius,
+    padding: theme.sp(4),
   }}>
     <div style={{
-      fontSize: theme.fontSize.md, fontWeight: theme.fontWeight.semibold,
-      color: theme.text, marginBottom: theme.sp(1),
+      fontSize: theme.fontSize.base, fontWeight: theme.fontWeight.semibold,
+      color: theme.text, marginBottom: '2px',
     }}>
       {title}
     </div>
     <div style={{
-      fontSize: theme.fontSize.xs, color: theme.primaryLight,
-      marginBottom: theme.sp(4), fontWeight: theme.fontWeight.medium,
+      fontSize: theme.fontSize.xs, color: theme.primary,
+      marginBottom: theme.sp(3), fontWeight: theme.fontWeight.medium,
     }}>
       NET NEW CAPABILITY — Bottoms-up vs Top-down Reconciliation
     </div>
@@ -33,11 +33,10 @@ export const DeltaChart: React.FC<DeltaChartProps> = ({ title, data, height = 35
         <CartesianGrid strokeDasharray="3 3" stroke={theme.surfaceBorder} horizontal={false} />
         <XAxis type="number" tick={{ fill: theme.textSecondary, fontSize: 11 }} axisLine={{ stroke: theme.surfaceBorder }} />
         <YAxis type="category" dataKey="name" tick={{ fill: theme.textSecondary, fontSize: 10 }} axisLine={{ stroke: theme.surfaceBorder }} width={110} />
-        <Tooltip
-          contentStyle={{
-            background: theme.surfaceRaised, border: `1px solid ${theme.surfaceBorder}`,
-            borderRadius: theme.radiusSm, color: theme.text, fontSize: 12,
-          }}
+        <Tooltip contentStyle={{
+          background: theme.surface, border: `1px solid ${theme.surfaceBorder}`,
+          borderRadius: theme.radius, color: theme.text, fontSize: 12, boxShadow: theme.shadow,
+        }}
           formatter={(value) => [`${value} HC`, 'Delta']}
         />
         <ReferenceLine x={0} stroke={theme.textMuted} strokeWidth={1} />

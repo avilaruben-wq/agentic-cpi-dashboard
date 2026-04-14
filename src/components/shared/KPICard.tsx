@@ -19,47 +19,46 @@ export const KPICard: React.FC<KPICardProps> = ({ label, value, delta, deltaDire
     <div style={{
       background: theme.surface,
       border: `1px solid ${theme.surfaceBorder}`,
-      borderRadius: theme.radiusLg,
-      padding: theme.sp(5),
+      borderRadius: theme.radius,
+      padding: theme.sp(4),
       flex: '1 1 0',
-      minWidth: '200px',
+      minWidth: '180px',
       position: 'relative',
-      overflow: 'hidden',
     }}>
       {accent && (
         <div style={{
-          position: 'absolute', top: 0, left: 0, right: 0, height: '3px',
+          position: 'absolute', top: 0, left: 0, right: 0, height: '2px',
           background: accent,
         }} />
       )}
       <div style={{
-        fontSize: theme.fontSize.sm,
+        fontSize: theme.fontSize.xs,
         color: theme.textSecondary,
         fontWeight: theme.fontWeight.medium,
         textTransform: 'uppercase',
-        letterSpacing: '0.5px',
-        marginBottom: theme.sp(2),
+        letterSpacing: '0.32px',
+        marginBottom: theme.sp(1),
       }}>
         {icon && <span style={{ marginRight: theme.sp(1) }}>{icon}</span>}
         {label}
       </div>
       <div style={{
         fontSize: theme.fontSize.xxl,
-        fontWeight: theme.fontWeight.bold,
+        fontWeight: theme.fontWeight.light,
         color: theme.text,
-        lineHeight: 1.1,
+        lineHeight: 1.2,
         fontFamily: theme.fontMono,
       }}>
         {value}
       </div>
       {delta && (
         <div style={{
-          fontSize: theme.fontSize.sm,
+          fontSize: theme.fontSize.xs,
           color: deltaColor,
           marginTop: theme.sp(1),
-          fontWeight: theme.fontWeight.medium,
+          fontWeight: theme.fontWeight.regular,
         }}>
-          {deltaDirection === 'up' ? '▲' : deltaDirection === 'down' ? '▼' : '●'} {delta}
+          {deltaDirection === 'up' ? '↑' : deltaDirection === 'down' ? '↓' : ''} {delta}
         </div>
       )}
     </div>

@@ -15,7 +15,6 @@ export const PulseDot: React.FC<PulseDotProps> = ({ color = theme.green, size = 
       borderRadius: '50%',
       background: color,
       display: 'inline-block',
-      boxShadow: `0 0 ${size}px ${color}`,
       animation: 'pulse 2s ease-in-out infinite',
     }} />
     {label && (

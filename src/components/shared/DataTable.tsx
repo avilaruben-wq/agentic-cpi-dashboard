@@ -60,53 +60,40 @@ export function DataTable<T>({
     });
   };
 
-  const headerStyle: React.CSSProperties = {
-    position: 'sticky',
-    top: 0,
-    background: theme.surfaceRaised,
-    padding: `${theme.sp(2)} ${theme.sp(3)}`,
-    fontSize: theme.fontSize.xs,
-    fontWeight: theme.fontWeight.semibold,
-    color: theme.textSecondary,
-    textTransform: 'uppercase',
-    letterSpacing: '0.5px',
-    borderBottom: `1px solid ${theme.surfaceBorder}`,
-    whiteSpace: 'nowrap',
-    userSelect: 'none',
-  };
-
-  const cellStyle: React.CSSProperties = {
-    padding: `${theme.sp(2)} ${theme.sp(3)}`,
-    fontSize: theme.fontSize.sm,
-    color: theme.text,
-    borderBottom: `1px solid ${theme.surfaceBorder}20`,
-    whiteSpace: 'nowrap',
-  };
-
   return (
     <div style={{
       border: `1px solid ${theme.surfaceBorder}`,
       borderRadius: theme.radius,
       overflow: 'hidden',
+      background: theme.surface,
     }}>
       <div style={{
         maxHeight: maxHeight || '500px',
         overflowY: 'auto',
         overflowX: 'auto',
       }}>
-        <table style={{
-          width: '100%',
-          borderCollapse: 'collapse',
-          tableLayout: 'auto',
-        }}>
+        <table style={{ width: '100%', borderCollapse: 'collapse' }}>
           <thead>
             <tr>
-              {expandable && <th style={{ ...headerStyle, width: '32px' }} />}
+              {expandable && <th style={{
+                position: 'sticky', top: 0, background: theme.surfaceRaised,
+                padding: `${theme.sp(2)} ${theme.sp(3)}`, width: '32px',
+                borderBottom: `1px solid ${theme.surfaceBorder}`,
+              }} />}
               {columns.map(col => (
                 <th
                   key={col.key}
                   style={{
-                    ...headerStyle,
+                    position: 'sticky', top: 0, background: theme.surfaceRaised,
+                    padding: `${theme.sp(2)} ${theme.sp(3)}`,
+                    fontSize: theme.fontSize.xs,
+                    fontWeight: theme.fontWeight.semibold,
+                    color: theme.textSecondary,
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.32px',
+                    borderBottom: `1px solid ${theme.surfaceBorder}`,
+                    whiteSpace: 'nowrap',
+                    userSelect: 'none',
                     width: col.width,
                     textAlign: col.align || 'left',
                     cursor: col.sortable !== false ? 'pointer' : 'default',
@@ -115,9 +102,7 @@ export function DataTable<T>({
                 >
                   {col.label}
                   {sortKey === col.key && (
-                    <span style={{ marginLeft: '4px' }}>
-                      {sortDir === 'asc' ? '↑' : '↓'}
-                    </span>
+                    <span style={{ marginLeft: '4px' }}>{sortDir === 'asc' ? '↑' : '↓'}</span>
                   )}
                 </th>
               ))}
@@ -131,28 +116,36 @@ export function DataTable<T>({
                 <React.Fragment key={key}>
                   <tr
                     style={{
-                      background: idx % 2 === 0 ? 'transparent' : `${theme.surface}80`,
+                      background: idx % 2 === 0 ? theme.surface : theme.surfaceRaised,
                       cursor: expandable ? 'pointer' : 'default',
-                      transition: 'background 0.15s',
+                      transition: 'background 0.1s',
                     }}
                     onClick={() => expandable && toggleExpand(key)}
                     onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = theme.surfaceHover; }}
-                    onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = idx % 2 === 0 ? 'transparent' : `${theme.surface}80`; }}
+                    onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = idx % 2 === 0 ? theme.surface : theme.surfaceRaised; }}
                   >
                     {expandable && (
-                      <td style={{ ...cellStyle, width: '32px', textAlign: 'center' }}>
+                      <td style={{ padding: `${theme.sp(2)} ${theme.sp(3)}`, width: '32px', textAlign: 'center', borderBottom: `1px solid ${theme.surfaceBorder}` }}>
                         <span style={{
                           display: 'inline-block',
                           transform: isExpanded ? 'rotate(90deg)' : 'rotate(0)',
-                          transition: 'transform 0.2s',
+                          transition: 'transform 0.15s',
                           color: theme.textMuted,
+                          fontSize: '10px',
                         }}>
                           ▶
                         </span>
                       </td>
                     )}
                     {columns.map(col => (
-                      <td key={col.key} style={{ ...cellStyle, textAlign: col.align || 'left' }}>
+                      <td key={col.key} style={{
+                        padding: `${theme.sp(2)} ${theme.sp(3)}`,
+                        fontSize: theme.fontSize.sm,
+                        color: theme.text,
+                        borderBottom: `1px solid ${theme.surfaceBorder}`,
+                        whiteSpace: 'nowrap',
+                        textAlign: col.align || 'left',
+                      }}>
                         {col.render ? col.render(row) : String((row as Record<string, unknown>)[col.key] ?? '')}
                       </td>
                     ))}

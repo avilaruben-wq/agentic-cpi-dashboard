@@ -1,59 +1,61 @@
+// IBM Carbon Design System — Light Theme
 export const theme = {
-  // Backgrounds
-  bg: '#0A1628',
-  surface: '#152238',
-  surfaceHover: '#1C2D45',
-  surfaceBorder: '#2A3A52',
-  surfaceRaised: '#1A2940',
+  // Backgrounds (Carbon Gray scale)
+  bg: '#f4f4f4',
+  surface: '#ffffff',
+  surfaceHover: '#e8e8e8',
+  surfaceBorder: '#e0e0e0',
+  surfaceRaised: '#f4f4f4',
 
   // IBM Blue
-  primary: '#0F62FE',
+  primary: '#0f62fe',
   primaryHover: '#0353E9',
-  primaryLight: '#A6C8FF',
-  primaryMuted: '#0F62FE33',
+  primaryLight: '#d0e2ff',
+  primaryMuted: '#0f62fe15',
 
-  // Text
-  text: '#F4F4F4',
-  textSecondary: '#A8B4C4',
-  textMuted: '#6B7A8D',
-  textInverse: '#0A1628',
+  // Text (Carbon)
+  text: '#161616',
+  textSecondary: '#525252',
+  textMuted: '#8d8d8d',
+  textInverse: '#ffffff',
+  textOnColor: '#ffffff',
 
   // Status
-  green: '#42BE65',
-  greenBg: '#42BE6520',
-  yellow: '#F1C21B',
-  yellowBg: '#F1C21B20',
-  red: '#DA1E28',
-  redBg: '#DA1E2820',
-  orange: '#FF832B',
-  orangeBg: '#FF832B20',
+  green: '#198038',
+  greenBg: '#defbe6',
+  yellow: '#b28600',
+  yellowBg: '#fdf6dd',
+  red: '#da1e28',
+  redBg: '#fff1f1',
+  orange: '#ba4e00',
+  orangeBg: '#fff2e8',
 
   // Severity scale
-  severityCritical: '#DA1E28',
-  severityHigh: '#FF832B',
-  severityMedium: '#F1C21B',
-  severityLow: '#42BE65',
+  severityCritical: '#da1e28',
+  severityHigh: '#ba4e00',
+  severityMedium: '#b28600',
+  severityLow: '#198038',
 
-  // Chart palette
-  chart1: '#0F62FE',
-  chart2: '#42BE65',
-  chart3: '#A56EFF',
-  chart4: '#FF832B',
-  chart5: '#F1C21B',
-  chart6: '#08BDBA',
+  // Chart palette (Carbon data viz)
+  chart1: '#0f62fe',
+  chart2: '#198038',
+  chart3: '#8a3ffc',
+  chart4: '#ba4e00',
+  chart5: '#b28600',
+  chart6: '#009d9a',
 
   // Pipeline
-  pipelineIdle: '#3A4A62',
-  pipelineActive: '#0F62FE',
-  pipelineComplete: '#42BE65',
-  pipelineGlow: '#0F62FE66',
+  pipelineIdle: '#c6c6c6',
+  pipelineActive: '#0f62fe',
+  pipelineComplete: '#198038',
+  pipelineGlow: '#0f62fe40',
 
   // Spacing
   sp: (n: number) => `${n * 4}px`,
-  radius: '8px',
-  radiusSm: '4px',
-  radiusLg: '12px',
-  radiusXl: '16px',
+  radius: '4px',
+  radiusSm: '2px',
+  radiusLg: '8px',
+  radiusXl: '12px',
 
   // Typography
   fontMono: "'IBM Plex Mono', monospace",
@@ -75,10 +77,14 @@ export const theme = {
     bold: 700,
   },
 
-  // Shadows
-  shadow: '0 2px 8px rgba(0,0,0,0.3)',
-  shadowLg: '0 4px 16px rgba(0,0,0,0.4)',
-  shadowGlow: '0 0 20px rgba(15,98,254,0.3)',
+  // Shadows (subtle for light theme)
+  shadow: '0 1px 3px rgba(0,0,0,0.08)',
+  shadowLg: '0 2px 6px rgba(0,0,0,0.1)',
+  shadowGlow: '0 0 0 3px rgba(15,98,254,0.15)',
+
+  // IBM-specific
+  headerBg: '#161616',
+  headerText: '#f4f4f4',
 } as const;
 
 export type Theme = typeof theme;

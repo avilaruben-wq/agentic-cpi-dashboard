@@ -11,14 +11,14 @@ export const ViewHeader: React.FC<ViewHeaderProps> = ({ title, description, acti
   <div style={{
     display: 'flex',
     justifyContent: 'space-between',
-    alignItems: 'flex-start',
+    alignItems: 'center',
     gap: theme.sp(4),
-    marginBottom: theme.sp(4),
+    marginBottom: theme.sp(3),
   }}>
     <div>
       <h2 style={{
         fontSize: theme.fontSize.lg,
-        fontWeight: theme.fontWeight.bold,
+        fontWeight: theme.fontWeight.semibold,
         color: theme.text,
         margin: 0,
         lineHeight: 1.3,
@@ -34,6 +34,6 @@ export const ViewHeader: React.FC<ViewHeaderProps> = ({ title, description, acti
         {description}
       </p>
     </div>
-    {action && <div>{action}</div>}
+    {action && <div style={{ flexShrink: 0 }}>{action}</div>}
   </div>
 );

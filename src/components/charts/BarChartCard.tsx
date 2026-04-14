@@ -18,15 +18,15 @@ export const BarChartCard: React.FC<BarChartCardProps> = ({
   <div style={{
     background: theme.surface,
     border: `1px solid ${theme.surfaceBorder}`,
-    borderRadius: theme.radiusLg,
-    padding: theme.sp(5),
+    borderRadius: theme.radius,
+    padding: theme.sp(4),
   }}>
-    <div style={{ marginBottom: theme.sp(4) }}>
-      <div style={{ fontSize: theme.fontSize.md, fontWeight: theme.fontWeight.semibold, color: theme.text }}>
+    <div style={{ marginBottom: theme.sp(3) }}>
+      <div style={{ fontSize: theme.fontSize.base, fontWeight: theme.fontWeight.semibold, color: theme.text }}>
         {title}
       </div>
       {subtitle && (
-        <div style={{ fontSize: theme.fontSize.sm, color: theme.textMuted, marginTop: theme.sp(1) }}>
+        <div style={{ fontSize: theme.fontSize.xs, color: theme.textMuted, marginTop: '2px' }}>
           {subtitle}
         </div>
       )}
@@ -36,15 +36,10 @@ export const BarChartCard: React.FC<BarChartCardProps> = ({
         <CartesianGrid strokeDasharray="3 3" stroke={theme.surfaceBorder} />
         <XAxis dataKey={xKey} tick={{ fill: theme.textSecondary, fontSize: 11 }} axisLine={{ stroke: theme.surfaceBorder }} />
         <YAxis tick={{ fill: theme.textSecondary, fontSize: 11 }} axisLine={{ stroke: theme.surfaceBorder }} />
-        <Tooltip
-          contentStyle={{
-            background: theme.surfaceRaised,
-            border: `1px solid ${theme.surfaceBorder}`,
-            borderRadius: theme.radiusSm,
-            color: theme.text,
-            fontSize: 12,
-          }}
-        />
+        <Tooltip contentStyle={{
+          background: theme.surface, border: `1px solid ${theme.surfaceBorder}`,
+          borderRadius: theme.radius, color: theme.text, fontSize: 12, boxShadow: theme.shadow,
+        }} />
         <Legend wrapperStyle={{ fontSize: 11, color: theme.textSecondary }} />
         {bars.map(b => (
           <Bar key={b.dataKey} dataKey={b.dataKey} fill={b.color} name={b.name}

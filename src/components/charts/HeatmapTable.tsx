@@ -13,20 +13,20 @@ interface HeatmapTableProps {
 export const HeatmapTable: React.FC<HeatmapTableProps> = ({
   title, rows, columns, data, rowLabel = 'JRS',
 }) => {
-  const allValues = data.flat();
-  const minVal = Math.min(...allValues);
-  const maxVal = Math.max(...allValues);
+  const allValues = data.flat().filter(v => v > 0);
+  const minVal = allValues.length ? Math.min(...allValues) : 0;
+  const maxVal = allValues.length ? Math.max(...allValues) : 1;
 
   return (
     <div style={{
       background: theme.surface,
       border: `1px solid ${theme.surfaceBorder}`,
-      borderRadius: theme.radiusLg,
-      padding: theme.sp(5),
+      borderRadius: theme.radius,
+      padding: theme.sp(4),
     }}>
       <div style={{
-        fontSize: theme.fontSize.md, fontWeight: theme.fontWeight.semibold,
-        color: theme.text, marginBottom: theme.sp(4),
+        fontSize: theme.fontSize.base, fontWeight: theme.fontWeight.semibold,
+        color: theme.text, marginBottom: theme.sp(3),
       }}>
         {title}
       </div>
@@ -38,7 +38,7 @@ export const HeatmapTable: React.FC<HeatmapTableProps> = ({
                 padding: `${theme.sp(2)} ${theme.sp(3)}`,
                 fontSize: theme.fontSize.xs, color: theme.textSecondary,
                 textAlign: 'left', fontWeight: theme.fontWeight.semibold,
-                textTransform: 'uppercase', letterSpacing: '0.5px',
+                textTransform: 'uppercase', letterSpacing: '0.32px',
                 borderBottom: `1px solid ${theme.surfaceBorder}`,
               }}>
                 {rowLabel}
@@ -61,24 +61,23 @@ export const HeatmapTable: React.FC<HeatmapTableProps> = ({
                 <td style={{
                   padding: `${theme.sp(2)} ${theme.sp(3)}`,
                   fontSize: theme.fontSize.sm, color: theme.text,
-                  whiteSpace: 'nowrap', borderBottom: `1px solid ${theme.surfaceBorder}20`,
+                  whiteSpace: 'nowrap', borderBottom: `1px solid ${theme.surfaceBorder}`,
                 }}>
                   {row}
                 </td>
                 {columns.map((col, ci) => {
                   const val = data[ri]?.[ci] ?? 0;
                   const bg = val > 0
-                    ? interpolateColor(val, minVal, maxVal, '#1A2940', '#DA1E28')
+                    ? interpolateColor(val, minVal, maxVal, '#fff1f1', '#da1e28')
                     : 'transparent';
                   return (
                     <td key={col} style={{
                       padding: `${theme.sp(2)} ${theme.sp(3)}`,
                       textAlign: 'center', fontSize: theme.fontSize.sm,
                       fontFamily: theme.fontMono,
-                      color: val > 0 ? theme.text : theme.textMuted,
+                      color: val > 0 ? (val > maxVal * 0.6 ? '#fff' : theme.text) : theme.textMuted,
                       background: bg,
-                      borderBottom: `1px solid ${theme.surfaceBorder}20`,
-                      borderRadius: '2px',
+                      borderBottom: `1px solid ${theme.surfaceBorder}`,
                     }}>
                       {val || '—'}
                     </td>
