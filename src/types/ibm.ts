@@ -32,4 +32,4 @@ export interface UtilizationTarget {
   delta: number;
 }
 
-export type TabId = 'supply' | 'demand' | 'gaps' | 'scenarios' | 'output' | 'pipeline';
+export type TabId = 'supply' | 'demand' | 'gaps' | 'scenarios' | 'output';

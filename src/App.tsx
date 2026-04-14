@@ -9,7 +9,6 @@ import { DemandView } from './components/views/DemandView';
 import { GapView } from './components/views/GapView';
 import { ScenarioView } from './components/views/ScenarioView';
 import { OutputView } from './components/views/OutputView';
-import { PipelineView } from './components/views/PipelineView';
 import { useAgentPipeline } from './hooks/useAgentPipeline';
 
 const keyframes = `
@@ -29,14 +28,10 @@ const keyframes = `
     from { opacity: 0; transform: translateY(8px); }
     to { opacity: 1; transform: translateY(0); }
   }
-  @keyframes slideIn {
-    from { opacity: 0; transform: translateX(-12px); }
-    to { opacity: 1; transform: translateX(0); }
-  }
 `;
 
 function App() {
-  const [activeTab, setActiveTab] = useState<TabId>('pipeline');
+  const [activeTab, setActiveTab] = useState<TabId>('supply');
   const pipeline = useAgentPipeline();
 
   useEffect(() => {
@@ -50,15 +45,6 @@ function App() {
       case 'gaps': return <GapView />;
       case 'scenarios': return <ScenarioView />;
       case 'output': return <OutputView />;
-      case 'pipeline': return (
-        <PipelineView
-          agents={pipeline.agents}
-          isRunning={pipeline.isRunning}
-          onRun={pipeline.runPipeline}
-          completedAt={pipeline.completedAt}
-          startedAt={pipeline.startedAt}
-        />
-      );
     }
   };
 
@@ -73,19 +59,16 @@ function App() {
       }}>
         <Header />
 
-        {activeTab !== 'pipeline' && (
-          <div style={{
-            borderBottom: `1px solid ${theme.surfaceBorder}`,
-            background: theme.bg,
-            padding: `${theme.sp(2)} ${theme.sp(6)}`,
-          }}>
-            <AgentPipeline
-              agents={pipeline.agents}
-              compact
-              onClick={() => setActiveTab('pipeline')}
-            />
-          </div>
-        )}
+        <div style={{
+          borderBottom: `1px solid ${theme.surfaceBorder}`,
+          background: theme.bg,
+          padding: `${theme.sp(2)} ${theme.sp(6)}`,
+        }}>
+          <AgentPipeline
+            agents={pipeline.agents}
+            compact
+          />
+        </div>
 
         <TabBar activeTab={activeTab} onTabChange={setActiveTab} />
 

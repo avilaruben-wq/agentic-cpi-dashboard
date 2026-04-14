@@ -13,7 +13,6 @@ const tabs: { id: TabId; label: string; icon: string }[] = [
   { id: 'gaps', label: 'Gaps', icon: '⚠' },
   { id: 'scenarios', label: 'Scenarios', icon: '◎' },
   { id: 'output', label: 'Output', icon: '◉' },
-  { id: 'pipeline', label: 'Pipeline', icon: '⟐' },
 ];
 
 export const TabBar: React.FC<TabBarProps> = ({ activeTab, onTabChange }) => (
