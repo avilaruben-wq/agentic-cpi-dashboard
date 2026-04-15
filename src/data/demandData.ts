@@ -91,6 +91,29 @@ export const demandDeltas: DemandDelta[] = [
   { geo: 'UKI', jrs: 'Quality Engineer-Automation', practice: 'Quality Engineering', band: 'B7-8', bottomsUpDemand: 26, topDownDemand: 38, delta: -12, deltaPercent: -31.6, severity: 'high', note: 'UKI QE pipeline gap — potential LondonFS expansion not yet captured' },
 ];
 
+// Revenue at risk per delta — computed from revenueCommit × (|delta| / topDownDemand)
+export const demandDeltasWithRevenue = demandDeltas.map(d => {
+  const rev = revenueImpliedDemands.find(r => r.geo === d.geo && r.jrs === d.jrs && r.band === d.band);
+  const revenueAtRisk = rev ? Math.round(Math.abs(d.delta) / d.topDownDemand * rev.revenueCommit) : 0;
+  return { ...d, revenueAtRisk };
+});
+
+// GEO-level rollup of revenue risk
+export const geoRevenuRiskSummary = (() => {
+  const byGeo: Record<string, { geo: string; totalDelta: number; totalRevenueAtRisk: number; shortfallCount: number; worstSeverity: string }> = {};
+  for (const d of demandDeltasWithRevenue) {
+    if (!byGeo[d.geo]) byGeo[d.geo] = { geo: d.geo, totalDelta: 0, totalRevenueAtRisk: 0, shortfallCount: 0, worstSeverity: 'low' };
+    byGeo[d.geo].totalDelta += d.delta;
+    byGeo[d.geo].totalRevenueAtRisk += d.revenueAtRisk;
+    byGeo[d.geo].shortfallCount++;
+    const sevOrder = ['low', 'medium', 'high', 'critical'];
+    if (sevOrder.indexOf(d.severity) > sevOrder.indexOf(byGeo[d.geo].worstSeverity)) {
+      byGeo[d.geo].worstSeverity = d.severity;
+    }
+  }
+  return Object.values(byGeo).sort((a, b) => a.totalRevenueAtRisk - b.totalRevenueAtRisk);
+})();
+
 // Demand vs Bench Gap — the primary working view per the spec
 export const demandVsBenchGaps = [
   { practice: 'Quality Engineering', demandTotal: 318, currentBench: 215, gap: -103, openReqs: 45, hiresInProgress: 28, attritionExpected: 35, isGrowthPractice: true },

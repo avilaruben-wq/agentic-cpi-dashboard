@@ -1,17 +1,16 @@
 import React, { useState } from 'react';
 import { theme } from '../../theme';
 import { AgentState, SubStep } from '../../types/ibm';
-import { dealDemands, revenueImpliedDemands, demandDeltas, demandVsBenchGaps, demandChurnData } from '../../data/demandData';
+import { dealDemands, revenueImpliedDemands, demandDeltas, demandDeltasWithRevenue, geoRevenuRiskSummary, demandVsBenchGaps, demandChurnData } from '../../data/demandData';
 import { DataTable, Column } from '../shared/DataTable';
 import { FilterBar } from '../shared/FilterBar';
 import { SummaryBar } from '../shared/SummaryBar';
 import { SubStepProgress } from '../shared/SubStepProgress';
 import { BarChartCard } from '../charts/BarChartCard';
-import { DeltaChart } from '../charts/DeltaChart';
 import { SeverityBadge } from '../shared/SeverityBadge';
 import { useFilters } from '../../hooks/useFilters';
-import { formatNumber, formatPercent } from '../../utils/format';
-import { DealDemand, RevenueImpliedDemand, DemandDelta, DemandSubView } from '../../types/demand';
+import { formatNumber, formatPercent, formatCurrency } from '../../utils/format';
+import { DealDemand, RevenueImpliedDemand, DemandSubView } from '../../types/demand';
 
 interface Agent2ViewProps {
   agentState: AgentState;
@@ -76,20 +75,6 @@ export const Agent2View: React.FC<Agent2ViewProps> = ({ agentState, onStateChang
     { key: 'conversionRatio', label: 'HC/$M', align: 'right', render: r => r.conversionRatio.toFixed(2), getValue: r => r.conversionRatio },
   ];
 
-  const deltaColumns: Column<DemandDelta>[] = [
-    { key: 'geo', label: 'GEO', width: '90px' },
-    { key: 'jrs', label: 'JRS', width: '220px' },
-    { key: 'band', label: 'Band', width: '70px', align: 'center' },
-    { key: 'bottomsUpDemand', label: 'Bottoms-Up', align: 'right', render: r => formatNumber(r.bottomsUpDemand), getValue: r => r.bottomsUpDemand },
-    { key: 'topDownDemand', label: 'Top-Down', align: 'right', render: r => formatNumber(r.topDownDemand), getValue: r => r.topDownDemand },
-    { key: 'delta', label: 'Delta', align: 'right', render: r => (
-      <span style={{ color: r.delta < -15 ? theme.red : r.delta < -5 ? theme.orange : theme.yellow, fontWeight: theme.fontWeight.semibold }}>
-        {formatNumber(r.delta)}
-      </span>
-    ), getValue: r => r.delta },
-    { key: 'severity', label: 'Severity', align: 'center', render: r => <SeverityBadge level={r.severity} /> },
-  ];
-
   const btnStyle = (active: boolean): React.CSSProperties => ({
     background: active ? theme.primary : theme.surface,
     border: `1px solid ${active ? theme.primary : theme.surfaceBorder}`,
@@ -105,9 +90,7 @@ export const Agent2View: React.FC<Agent2ViewProps> = ({ agentState, onStateChang
     jrs: jrs.replace(/^(App |Data |Quality |Solution |Site Reliability |Test |Project |Business |Cybersecurity )/, ''), demand,
   }));
 
-  const deltaChartData = filteredDeltas.map(d => ({
-    name: `${d.geo} — ${d.jrs.split('-')[0]}`, delta: d.delta, severity: d.severity,
-  }));
+  const filteredDeltasWithRev = filterData(demandDeltasWithRevenue, d => d.geo, d => d.practice, d => d.jrs);
 
   if (agentState === 'locked') {
     return (
@@ -183,17 +166,72 @@ export const Agent2View: React.FC<Agent2ViewProps> = ({ agentState, onStateChang
                   What this means
                 </div>
                 <div style={{ fontSize: theme.fontSize.sm, color: theme.textSecondary, lineHeight: 1.6 }}>
-                  Each row below shows a JRS where the current deal pipeline does not support the GEO's revenue target. A negative delta means the GEO needs more signed deals in that skill area to hit their number. <strong style={{ color: theme.text }}>This is a signal to sell more work — not to staff up.</strong> Staffing decisions should be based on the Deal Pipeline view, not these gaps.
+                  A negative HC delta means the deal pipeline doesn't support the revenue target for that GEO/skill. The revenue at risk column shows the dollar impact. <strong style={{ color: theme.text }}>This is a signal to sell more work — not to staff up.</strong> Share with GEO leads to drive pipeline actions.
                 </div>
               </div>
 
-              <DeltaChart title="Pipeline Shortfall vs Revenue Targets" data={deltaChartData} />
-              <DataTable columns={deltaColumns} data={filteredDeltas} keyExtractor={r => `${r.geo}-${r.jrs}-${r.band}`}
-                expandable renderExpanded={r => (
+              <div style={{ fontSize: theme.fontSize.base, fontWeight: theme.fontWeight.semibold, color: theme.text, marginTop: theme.sp(2) }}>
+                Revenue Risk by GEO
+              </div>
+              <div style={{ fontSize: theme.fontSize.sm, color: theme.textMuted, fontStyle: 'italic', marginBottom: theme.sp(2) }}>
+                Aggregated pipeline shortfall per GEO — total revenue at risk if pipeline gaps are not closed
+              </div>
+              <DataTable
+                columns={[
+                  { key: 'geo', label: 'GEO', width: '120px' },
+                  { key: 'shortfallCount', label: 'Skill Gaps', align: 'right' as const, getValue: (r: typeof geoRevenuRiskSummary[0]) => r.shortfallCount },
+                  { key: 'totalDelta', label: 'HC Shortfall', align: 'right' as const, render: (r: typeof geoRevenuRiskSummary[0]) => (
+                    <span style={{ color: theme.red, fontWeight: theme.fontWeight.semibold, fontFamily: theme.fontMono }}>
+                      {formatNumber(r.totalDelta)}
+                    </span>
+                  ), getValue: (r: typeof geoRevenuRiskSummary[0]) => r.totalDelta },
+                  { key: 'totalRevenueAtRisk', label: 'Revenue at Risk', align: 'right' as const, render: (r: typeof geoRevenuRiskSummary[0]) => (
+                    <span style={{ color: theme.red, fontWeight: theme.fontWeight.bold, fontFamily: theme.fontMono }}>
+                      {formatCurrency(r.totalRevenueAtRisk)}
+                    </span>
+                  ), getValue: (r: typeof geoRevenuRiskSummary[0]) => r.totalRevenueAtRisk },
+                  { key: 'worstSeverity', label: 'Worst Severity', align: 'center' as const, render: (r: typeof geoRevenuRiskSummary[0]) => (
+                    <SeverityBadge level={r.worstSeverity as 'critical' | 'high' | 'medium' | 'low'} />
+                  ) },
+                ]}
+                data={geoRevenuRiskSummary}
+                keyExtractor={r => r.geo}
+              />
+
+              <div style={{ fontSize: theme.fontSize.base, fontWeight: theme.fontWeight.semibold, color: theme.text, marginTop: theme.sp(4) }}>
+                Revenue Risk Detail — by GEO, JRS, and Band
+              </div>
+              <div style={{ fontSize: theme.fontSize.sm, color: theme.textMuted, fontStyle: 'italic', marginBottom: theme.sp(2) }}>
+                Expand any row to see the recommended action for that pipeline gap
+              </div>
+              <DataTable
+                columns={[
+                  { key: 'geo', label: 'GEO', width: '90px' },
+                  { key: 'jrs', label: 'JRS', width: '200px' },
+                  { key: 'band', label: 'Band', width: '70px', align: 'center' as const },
+                  { key: 'bottomsUpDemand', label: 'Pipeline HC', align: 'right' as const, render: (r: typeof filteredDeltasWithRev[0]) => formatNumber(r.bottomsUpDemand), getValue: (r: typeof filteredDeltasWithRev[0]) => r.bottomsUpDemand },
+                  { key: 'topDownDemand', label: 'Target HC', align: 'right' as const, render: (r: typeof filteredDeltasWithRev[0]) => formatNumber(r.topDownDemand), getValue: (r: typeof filteredDeltasWithRev[0]) => r.topDownDemand },
+                  { key: 'delta', label: 'HC Delta', align: 'right' as const, render: (r: typeof filteredDeltasWithRev[0]) => (
+                    <span style={{ color: r.delta < -15 ? theme.red : r.delta < -5 ? theme.orange : theme.yellow, fontWeight: theme.fontWeight.semibold, fontFamily: theme.fontMono }}>
+                      {formatNumber(r.delta)}
+                    </span>
+                  ), getValue: (r: typeof filteredDeltasWithRev[0]) => r.delta },
+                  { key: 'revenueAtRisk', label: 'Revenue at Risk', align: 'right' as const, render: (r: typeof filteredDeltasWithRev[0]) => (
+                    <span style={{ color: theme.red, fontWeight: theme.fontWeight.semibold, fontFamily: theme.fontMono }}>
+                      {formatCurrency(r.revenueAtRisk)}
+                    </span>
+                  ), getValue: (r: typeof filteredDeltasWithRev[0]) => r.revenueAtRisk },
+                  { key: 'severity', label: 'Severity', align: 'center' as const, render: (r: typeof filteredDeltasWithRev[0]) => <SeverityBadge level={r.severity} /> },
+                ]}
+                data={filteredDeltasWithRev}
+                keyExtractor={r => `${r.geo}-${r.jrs}-${r.band}`}
+                expandable
+                renderExpanded={r => (
                   <div style={{ padding: theme.sp(2), color: theme.textSecondary, fontSize: theme.fontSize.sm }}>
                     <strong style={{ color: theme.text }}>Action needed: </strong>{r.note}
                   </div>
-                )} />
+                )}
+              />
             </>
           )}
           {subView === 'demandVsBench' && (
