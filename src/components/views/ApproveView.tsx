@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { theme } from '../../theme';
-import { AgentState } from '../../types/ibm';
+import { AgentState, PlanningMode } from '../../types/ibm';
 import { totalGapCount, totalRevenueAtRisk, critSitCount } from '../../data/gapData';
 import { supplySnapshot } from '../../data/supplyData';
 import { SummaryBar } from '../shared/SummaryBar';
@@ -9,6 +9,7 @@ import { formatNumber, formatCurrency } from '../../utils/format';
 interface ApproveViewProps {
   agentState: AgentState;
   onStateChange: (s: AgentState) => void;
+  planningMode: PlanningMode;
 }
 
 const docStyles = {
@@ -29,7 +30,8 @@ const docStyles = {
 
 const approvers = ['GEO COO — Americas', 'GEO COO — EMEA', 'GEO COO — APAC', 'GEO COO — Japan', 'GEO COO — UKI', 'Global CFO', 'BPOD Lead'];
 
-export const ApproveView: React.FC<ApproveViewProps> = ({ agentState, onStateChange }) => {
+export const ApproveView: React.FC<ApproveViewProps> = ({ agentState, onStateChange, planningMode }) => {
+  const isQuarterly = planningMode === 'quarterly';
   const [tab, setTab] = useState<'summary' | 'di' | 'score'>('summary');
   const [checkedApprovers, setCheckedApprovers] = useState<Set<string>>(new Set());
 
@@ -68,10 +70,12 @@ export const ApproveView: React.FC<ApproveViewProps> = ({ agentState, onStateCha
     <div style={{ display: 'flex', flexDirection: 'column', gap: theme.sp(4) }}>
       <div>
         <h2 style={{ fontSize: theme.fontSize.lg, fontWeight: theme.fontWeight.semibold, color: theme.text, margin: 0 }}>
-          Leaders Review & Approve
+          {isQuarterly ? 'Leaders Review & Approve' : 'Review & Submit'}
         </h2>
         <p style={{ fontSize: theme.fontSize.sm, color: theme.textMuted, margin: `${theme.sp(1)} 0 0` }}>
-          BPOD / COO / CFO approve HC commitment and fulfillment actions — single integrated review
+          {isQuarterly
+            ? 'BPOD / COO / CFO approve HC commitment and fulfillment actions — single integrated review'
+            : 'Review the 90-day resourcing recommendations and submit for action'}
         </p>
       </div>
 
@@ -86,8 +90,12 @@ export const ApproveView: React.FC<ApproveViewProps> = ({ agentState, onStateCha
 
       <div style={{ display: 'flex', gap: theme.sp(2) }}>
         <button style={btnStyle(tab === 'summary')} onClick={() => setTab('summary')}>Approval Summary</button>
-        <button style={btnStyle(tab === 'di')} onClick={() => setTab('di')}>DI Authorization Letter</button>
-        <button style={btnStyle(tab === 'score')} onClick={() => setTab('score')}>SCORE Plan</button>
+        {isQuarterly && (
+          <>
+            <button style={btnStyle(tab === 'di')} onClick={() => setTab('di')}>DI Authorization Letter</button>
+            <button style={btnStyle(tab === 'score')} onClick={() => setTab('score')}>SCORE Plan</button>
+          </>
+        )}
       </div>
 
       {tab === 'summary' && (
@@ -95,8 +103,8 @@ export const ApproveView: React.FC<ApproveViewProps> = ({ agentState, onStateCha
           <div style={docStyles.header}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
               <div>
-                <h1 style={docStyles.title}>Capacity Plan Approval</h1>
-                <p style={docStyles.subtitle}>Q3 2026 — Demand Interlock Authorization</p>
+                <h1 style={docStyles.title}>{isQuarterly ? 'Capacity Plan Approval' : '90-Day Resourcing Plan'}</h1>
+                <p style={docStyles.subtitle}>{isQuarterly ? 'Q3 2026 — Demand Interlock Authorization' : '90-Day Talent Interlock — Apr 14 – Jul 13, 2026'}</p>
               </div>
               <span style={{ background: agentState === 'approved' ? '#198038' : theme.primary, color: '#fff', padding: '4px 12px', borderRadius: '2px', fontSize: '11px', fontWeight: 600 }}>
                 {agentState === 'approved' ? 'APPROVED' : 'PENDING APPROVAL'}

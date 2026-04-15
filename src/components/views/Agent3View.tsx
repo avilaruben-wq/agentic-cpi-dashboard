@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { theme } from '../../theme';
-import { AgentState, SubStep } from '../../types/ibm';
+import { AgentState, SubStep, PlanningMode } from '../../types/ibm';
 import { gapEntries, totalGapCount, totalRevenueAtRisk, critSitCount } from '../../data/gapData';
 import { scenarios } from '../../data/scenarioData';
 import { DataTable, Column } from '../shared/DataTable';
@@ -20,13 +20,20 @@ import { FULFILLMENT_STEP_LABELS } from '../../data/constants';
 interface Agent3ViewProps {
   agentState: AgentState;
   onStateChange: (s: AgentState) => void;
+  planningMode: PlanningMode;
 }
 
-const subSteps: SubStep[] = [
+const quarterlySteps: SubStep[] = [
   { id: '3.1', label: 'Identifying supply-demand gaps' },
   { id: '3.2', label: 'Running fulfillment hierarchy per gap' },
   { id: '3.3', label: 'Modeling scenarios and cost impact' },
   { id: '3.4', label: 'Generating gap register and recommendations' },
+];
+
+const ninetyDaySteps: SubStep[] = [
+  { id: '3.1', label: 'Identifying supply-demand gaps' },
+  { id: '3.2', label: 'Running fulfillment hierarchy per gap' },
+  { id: '3.3', label: 'Generating 90-day resourcing recommendations' },
 ];
 
 type Section = 'gaps' | 'scenarios';
@@ -114,7 +121,9 @@ const ScenarioCard: React.FC<{
   </div>
 );
 
-export const Agent3View: React.FC<Agent3ViewProps> = ({ agentState, onStateChange }) => {
+export const Agent3View: React.FC<Agent3ViewProps> = ({ agentState, onStateChange, planningMode }) => {
+  const isQuarterly = planningMode === 'quarterly';
+  const subSteps = isQuarterly ? quarterlySteps : ninetyDaySteps;
   const [section, setSection] = useState<Section>('gaps');
   const [selectedScenario, setSelectedScenario] = useState<ScenarioType | null>(null);
   const { filters, setGeo, setPractice, setJrs, reset, filterData } = useFilters();
@@ -202,10 +211,12 @@ export const Agent3View: React.FC<Agent3ViewProps> = ({ agentState, onStateChang
             { label: 'Base cGP impact', value: '-$120M', color: theme.orange },
           ]} />
 
-          <div style={{ display: 'flex', gap: theme.sp(2) }}>
-            <button style={btnStyle(section === 'gaps')} onClick={() => setSection('gaps')}>Gap Register</button>
-            <button style={btnStyle(section === 'scenarios')} onClick={() => setSection('scenarios')}>Scenario Comparison</button>
-          </div>
+          {isQuarterly && (
+            <div style={{ display: 'flex', gap: theme.sp(2) }}>
+              <button style={btnStyle(section === 'gaps')} onClick={() => setSection('gaps')}>Gap Register</button>
+              <button style={btnStyle(section === 'scenarios')} onClick={() => setSection('scenarios')}>Scenario Comparison</button>
+            </div>
+          )}
 
           {section === 'gaps' && (
             <>

@@ -36,6 +36,8 @@ export type TabId = 'agent1' | 'agent2' | 'agent3' | 'approve';
 
 export type AgentState = 'locked' | 'ready' | 'running' | 'review' | 'approved';
 
+export type PlanningMode = '90day' | 'quarterly';
+
 export interface SubStep {
   id: string;
   label: string;

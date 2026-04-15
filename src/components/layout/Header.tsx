@@ -26,14 +26,6 @@ export const Header: React.FC = () => (
         <span style={{ fontWeight: theme.fontWeight.semibold }}>Agentic CPI</span>
       </div>
     </div>
-    <div style={{ display: 'flex', alignItems: 'center', gap: theme.sp(4) }}>
-      <span style={{
-        fontSize: theme.fontSize.sm,
-        color: '#c6c6c6',
-        fontFamily: theme.fontMono,
-      }}>
-        Q3 2026
-      </span>
-    </div>
+    <div />
   </header>
 );
