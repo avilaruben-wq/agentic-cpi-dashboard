@@ -19,13 +19,12 @@ interface Agent2ViewProps {
 }
 
 const subSteps: SubStep[] = [
-  { id: '2.1', label: 'Ingest deal data from Certinia, Salesforce/IPPF, solutioning models, Finance revenue commit' },
-  { id: '2.2', label: 'Apply Certinia win-probability scores; filter pipeline to high-confidence demand' },
-  { id: '2.3', label: 'Translate demand into bottoms-up capacity view by JRS x band x labor pool' },
-  { id: '2.4', label: 'Translate revenue commit into top-down view using historical HC conversion ratios' },
-  { id: '2.5', label: 'Reconcile bottoms-up vs top-down demand; surface the delta' },
-  { id: '2.6', label: 'Generate demand report — bottoms-up demand, delta vs financial targets' },
-  { id: '2.7', label: 'GEO Lead reviews demand report; resolves discrepancies; confirms demand picture', isHumanReview: true },
+  { id: '2.1', label: 'Ingesting deal pipeline and revenue data' },
+  { id: '2.2', label: 'Scoring deals by win probability' },
+  { id: '2.3', label: 'Building bottoms-up demand view' },
+  { id: '2.4', label: 'Building top-down revenue-implied view' },
+  { id: '2.5', label: 'Reconciling and surfacing the delta' },
+  { id: '2.6', label: 'Generating demand forecast report' },
 ];
 
 export const Agent2View: React.FC<Agent2ViewProps> = ({ agentState, onStateChange }) => {
@@ -132,7 +131,6 @@ export const Agent2View: React.FC<Agent2ViewProps> = ({ agentState, onStateChang
         onApprove={() => onStateChange('approved')}
         runLabel="Run Demand Forecast Agent"
         agentName="Demand Forecast Agent"
-        agentDescription="Ingests deal data from GreenSTAR/Certinia, scores by win/churn probability, and reconciles bottoms-up deal-backed demand against top-down revenue-implied demand to surface the delta."
       />
 
       {showResults && (

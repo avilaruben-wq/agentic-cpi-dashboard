@@ -17,11 +17,10 @@ interface Agent1ViewProps {
 }
 
 const subSteps: SubStep[] = [
-  { id: '1.1', label: 'Define baseline HC by JRS, band, location from WF360; reconcile funded vs supervisory' },
-  { id: '1.2', label: 'Apply attrition, holiday, vacation, leave adjustments from EIS/MIS historical patterns' },
-  { id: '1.3', label: 'Layer in availability by talent pool; add contractor/Sub-K HC from SAP Fieldglass' },
-  { id: '1.4', label: 'Generate supply dashboard — HC by Geo, JRS, band, active/bench, and talent pool' },
-  { id: '1.5', label: 'GEO WFM Lead reviews and approves supply baseline', isHumanReview: true },
+  { id: '1.1', label: 'Ingesting headcount data across all systems' },
+  { id: '1.2', label: 'Applying attrition and leave adjustments' },
+  { id: '1.3', label: 'Adding contractor and bench availability' },
+  { id: '1.4', label: 'Generating supply baseline dashboard' },
 ];
 
 export const Agent1View: React.FC<Agent1ViewProps> = ({ agentState, onStateChange }) => {
@@ -71,7 +70,6 @@ export const Agent1View: React.FC<Agent1ViewProps> = ({ agentState, onStateChang
         onApprove={() => onStateChange('approved')}
         runLabel="Run Supply Baseline Agent"
         agentName="Supply Baseline Agent"
-        agentDescription="Auto-ingests and reconciles headcount from WF360, SCORE, and SAP Fieldglass. Applies attrition, leave, and availability adjustments to produce a continuously refreshing supply baseline."
       />
 
       {showResults && (

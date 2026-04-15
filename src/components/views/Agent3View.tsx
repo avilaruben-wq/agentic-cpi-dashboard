@@ -23,11 +23,10 @@ interface Agent3ViewProps {
 }
 
 const subSteps: SubStep[] = [
-  { id: '3.1', label: 'Surface gaps between demand and supply by JRS, band, location; score by revenue risk, fill difficulty, lead time, cGP impact' },
-  { id: '3.2', label: 'Auto-run 6-step fulfillment hierarchy per gap; rank levers by cost and lead-time' },
-  { id: '3.3', label: 'Model conservative, base, and flex scenarios with cGP impact per scenario' },
-  { id: '3.4', label: 'Generate gap register, fulfillment plans, scenario comparison, DI authorization letter' },
-  { id: '3.5', label: 'Geo Leads review gap register and recommendations; add local context', isHumanReview: true },
+  { id: '3.1', label: 'Identifying supply-demand gaps' },
+  { id: '3.2', label: 'Running fulfillment hierarchy per gap' },
+  { id: '3.3', label: 'Modeling scenarios and cost impact' },
+  { id: '3.4', label: 'Generating gap register and recommendations' },
 ];
 
 type Section = 'gaps' | 'scenarios';
@@ -180,7 +179,6 @@ export const Agent3View: React.FC<Agent3ViewProps> = ({ agentState, onStateChang
         onApprove={() => onStateChange('approved')}
         runLabel="Run Gaps & Actions Agent"
         agentName="Gaps & Actions Agent"
-        agentDescription="Surfaces supply-demand gaps, runs the 6-step fulfillment hierarchy per gap, models scenarios with cGP impact, and generates the DI authorization letter and SCORE plan."
       />
 
       {showResults && (
