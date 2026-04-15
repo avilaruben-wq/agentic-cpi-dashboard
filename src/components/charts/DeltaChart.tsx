@@ -26,7 +26,7 @@ export const DeltaChart: React.FC<DeltaChartProps> = ({ title, data, height = 35
       fontSize: theme.fontSize.xs, color: theme.primary,
       marginBottom: theme.sp(3), fontWeight: theme.fontWeight.medium,
     }}>
-      NET NEW CAPABILITY — Bottoms-up vs Top-down Reconciliation
+      Negative bars = pipeline shortfall vs revenue target — these GEO/skill areas need more signed deals
     </div>
     <ResponsiveContainer width="100%" height={height}>
       <BarChart data={data} layout="vertical" margin={{ top: 5, right: 20, left: 120, bottom: 5 }}>

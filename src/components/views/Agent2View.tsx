@@ -146,14 +146,14 @@ export const Agent2View: React.FC<Agent2ViewProps> = ({ agentState, onStateChang
           <div style={{ display: 'flex', gap: theme.sp(2) }}>
             <button style={btnStyle(subView === 'bottomsUp')} onClick={() => setSubView('bottomsUp')}>Deal Pipeline</button>
             <button style={btnStyle(subView === 'topDown')} onClick={() => setSubView('topDown')}>Revenue Targets</button>
-            <button style={btnStyle(subView === 'delta')} onClick={() => setSubView('delta')}>Delta {critDeltas > 0 && '●'}</button>
+            <button style={btnStyle(subView === 'delta')} onClick={() => setSubView('delta')}>Revenue Risk {critDeltas > 0 && '●'}</button>
             <button style={btnStyle(subView === 'demandVsBench')} onClick={() => setSubView('demandVsBench')}>Demand vs Bench</button>
           </div>
 
           <div style={{ fontSize: theme.fontSize.sm, color: theme.textMuted, fontStyle: 'italic' }}>
             {subView === 'bottomsUp' && 'Demand from signed deals and pipeline, scored by win probability'}
             {subView === 'topDown' && 'Demand implied by revenue targets — what finance expects us to deliver'}
-            {subView === 'delta' && 'Where deal-backed demand diverges from financial targets — the key planning gap'}
+            {subView === 'delta' && 'Where the deal pipeline falls short of revenue targets — GEO leads need to close this gap through new sales, not staffing'}
             {subView === 'demandVsBench' && 'Can current bench fill the demand? The gap drives hiring and fulfillment actions'}
           </div>
 
@@ -172,11 +172,26 @@ export const Agent2View: React.FC<Agent2ViewProps> = ({ agentState, onStateChang
           )}
           {subView === 'delta' && (
             <>
-              <DeltaChart title="Demand Delta — Bottoms-Up vs Top-Down" data={deltaChartData} />
+              <div style={{
+                background: theme.primaryMuted,
+                border: `1px solid ${theme.primary}30`,
+                borderLeft: `3px solid ${theme.primary}`,
+                borderRadius: theme.radius,
+                padding: `${theme.sp(3)} ${theme.sp(4)}`,
+              }}>
+                <div style={{ fontSize: theme.fontSize.sm, fontWeight: theme.fontWeight.semibold, color: theme.text, marginBottom: theme.sp(1) }}>
+                  What this means
+                </div>
+                <div style={{ fontSize: theme.fontSize.sm, color: theme.textSecondary, lineHeight: 1.6 }}>
+                  Each row below shows a JRS where the current deal pipeline does not support the GEO's revenue target. A negative delta means the GEO needs more signed deals in that skill area to hit their number. <strong style={{ color: theme.text }}>This is a signal to sell more work — not to staff up.</strong> Staffing decisions should be based on the Deal Pipeline view, not these gaps.
+                </div>
+              </div>
+
+              <DeltaChart title="Pipeline Shortfall vs Revenue Targets" data={deltaChartData} />
               <DataTable columns={deltaColumns} data={filteredDeltas} keyExtractor={r => `${r.geo}-${r.jrs}-${r.band}`}
                 expandable renderExpanded={r => (
                   <div style={{ padding: theme.sp(2), color: theme.textSecondary, fontSize: theme.fontSize.sm }}>
-                    <strong style={{ color: theme.text }}>Analysis: </strong>{r.note}
+                    <strong style={{ color: theme.text }}>Action needed: </strong>{r.note}
                   </div>
                 )} />
             </>
