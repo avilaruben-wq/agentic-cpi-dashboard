@@ -134,6 +134,49 @@ export const utilizationTargets: UtilizationTarget[] = [
   { geo: 'UKI', target: 86.0, actual: 83.8, delta: -2.2 },
 ];
 
+// Bench Aging by Practice
+export const benchAgingData = [
+  { practice: 'Quality Engineering', total: 215, d1_14: 62, d15_30: 48, d31_60: 45, d61_90: 32, d90plus: 28, approachingBench: 38 },
+  { practice: 'SAP Application Ops', total: 125, d1_14: 30, d15_30: 28, d31_60: 25, d61_90: 22, d90plus: 20, approachingBench: 24 },
+  { practice: 'Custom Application Ops', total: 98, d1_14: 28, d15_30: 22, d31_60: 20, d61_90: 15, d90plus: 13, approachingBench: 18 },
+  { practice: 'Data Services', total: 82, d1_14: 25, d15_30: 20, d31_60: 16, d61_90: 12, d90plus: 9, approachingBench: 15 },
+  { practice: 'AI & Analytics', total: 78, d1_14: 22, d15_30: 18, d31_60: 15, d61_90: 13, d90plus: 10, approachingBench: 20 },
+  { practice: 'Digital Product Engineering iX', total: 95, d1_14: 30, d15_30: 24, d31_60: 18, d61_90: 13, d90plus: 10, approachingBench: 16 },
+  { practice: 'Cloud Platform Services', total: 68, d1_14: 20, d15_30: 16, d31_60: 14, d61_90: 10, d90plus: 8, approachingBench: 12 },
+  { practice: 'Security Services', total: 43, d1_14: 14, d15_30: 10, d31_60: 8, d61_90: 6, d90plus: 5, approachingBench: 8 },
+  { practice: 'Intelligent Automation', total: 28, d1_14: 10, d15_30: 7, d31_60: 5, d61_90: 3, d90plus: 3, approachingBench: 5 },
+];
+
+// Funded vs Supervisory HC Delta
+export const fundedVsSupervisoryData = [
+  { practice: 'Quality Engineering', funded: 2180, supervisory: 2245, delta: -65, note: 'Supervisory HC higher — 65 unfunded positions' },
+  { practice: 'SAP Application Ops', funded: 1420, supervisory: 1385, delta: 35, note: 'Funded HC exceeds supervisory — open REQs' },
+  { practice: 'Custom Application Ops', funded: 1680, supervisory: 1720, delta: -40, note: 'Supervisory HC higher — reorg lag' },
+  { practice: 'Data Services', funded: 890, supervisory: 875, delta: 15, note: 'Aligned within tolerance' },
+  { practice: 'AI & Analytics', funded: 760, supervisory: 810, delta: -50, note: 'Supervisory HC higher — new hires pending org assignment' },
+  { practice: 'Digital Product Engineering iX', funded: 1150, supervisory: 1130, delta: 20, note: 'Aligned within tolerance' },
+  { practice: 'Cloud Platform Services', funded: 720, supervisory: 695, delta: 25, note: 'Funded HC exceeds supervisory — transfers pending' },
+  { practice: 'Security Services', funded: 410, supervisory: 425, delta: -15, note: 'Aligned within tolerance' },
+];
+
+// Attrition Data
+export const attritionData = [
+  { geo: 'Americas' as const, misPlanned: 120, misActual: 105, eisPlanned: 280, eisActual: 310, totalPlanned: 400, totalActual: 415 },
+  { geo: 'EMEA' as const, misPlanned: 85, misActual: 78, eisPlanned: 190, eisActual: 205, totalPlanned: 275, totalActual: 283 },
+  { geo: 'APAC' as const, misPlanned: 65, misActual: 58, eisPlanned: 220, eisActual: 245, totalPlanned: 285, totalActual: 303 },
+  { geo: 'Japan' as const, misPlanned: 25, misActual: 22, eisPlanned: 55, eisActual: 48, totalPlanned: 80, totalActual: 70 },
+  { geo: 'UKI' as const, misPlanned: 35, misActual: 32, eisPlanned: 85, eisActual: 92, totalPlanned: 120, totalActual: 124 },
+];
+
+// Hires YTD
+export const hiresYTDData = [
+  { geo: 'Americas' as const, onboarded: 1420, anob: 185, offersOut: 95, openReqs: 340 },
+  { geo: 'EMEA' as const, onboarded: 890, anob: 120, offersOut: 65, openReqs: 220 },
+  { geo: 'APAC' as const, onboarded: 1150, anob: 165, offersOut: 80, openReqs: 280 },
+  { geo: 'Japan' as const, onboarded: 280, anob: 35, offersOut: 20, openReqs: 65 },
+  { geo: 'UKI' as const, onboarded: 320, anob: 45, offersOut: 25, openReqs: 85 },
+];
+
 export const geoSupplySummaries: GeoSupplySummary[] = GEOS.map(geo => {
   const entries = supplyEntries.filter(e => e.geo === geo);
   const active = entries.reduce((s, e) => s + e.active, 0);

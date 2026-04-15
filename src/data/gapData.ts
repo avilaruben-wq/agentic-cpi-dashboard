@@ -107,3 +107,18 @@ export const gapEntries: GapEntry[] = [
 export const totalGapCount = gapEntries.reduce((s, g) => s + g.gapCount, 0);
 export const totalRevenueAtRisk = gapEntries.reduce((s, g) => s + g.revenueAtRisk, 0);
 export const critSitCount = gapEntries.filter(g => g.isCritSit).length;
+
+// Cross-GEO Conflicts — same scarce skill demanded by multiple GEOs
+export const crossGeoConflicts = [
+  { jrs: 'App Developer-SAP ABAP HANA', band: 'B7-8', competingGeos: ['Americas', 'EMEA', 'Japan'], totalDemand: 272, availableGlobal: 85, severity: 'critical' as const, note: 'All 3 GEOs requesting from same FNC Global SAP pool — insufficient capacity' },
+  { jrs: 'Data Scientist-AI', band: 'B7-8', competingGeos: ['Americas', 'APAC'], totalDemand: 140, availableGlobal: 48, severity: 'high' as const, note: 'AI talent pool cannot satisfy both regions simultaneously' },
+  { jrs: 'Quality Engineer-Automation', band: 'B7-8', competingGeos: ['EMEA', 'APAC', 'UKI'], totalDemand: 355, availableGlobal: 118, severity: 'critical' as const, note: 'QE automation skills critical across 3 GEOs — FNC ramp is the bottleneck' },
+  { jrs: 'Cybersecurity Analyst', band: 'B7-8', competingGeos: ['EMEA', 'Japan'], totalDemand: 53, availableGlobal: 22, severity: 'medium' as const, note: 'Bilingual requirement in Japan limits cross-GEO sharing' },
+];
+
+// Auto-generated narrative per scenario
+export const scenarioNarratives: Record<string, string> = {
+  conservative: 'Under the conservative scenario, IBM Consulting addresses 1,973 of 2,931 identified gaps, prioritizing CritSit resolution and bench redeployment while limiting external hiring and SubK spend. This leaves approximately $94M in revenue at risk but keeps fulfillment costs contained at $30.5M. Recommended for environments with uncertain pipeline visibility.',
+  base: 'The base scenario activates all fulfillment levers to address the full 2,931 gap. The 6-step hierarchy is applied per gap, with bench and rotation covering 30% of needs, reskilling and ANOB addressing 15%, and external hiring plus SubK filling the remainder. Total investment: $50.0M. This is the recommended path given current pipeline confidence levels and the 8 CritSit gaps requiring immediate action.',
+  flex: 'The flex scenario positions IBM Consulting for growth by proactively addressing 3,580 projected gaps including high-probability unsigned pipeline. This requires $73M in fulfillment investment but captures an estimated $45-65M in additional cGP if demand materializes. Recommended only if Q3 signed pipeline exceeds 80% of forecast by the 30-day gate review.',
+};

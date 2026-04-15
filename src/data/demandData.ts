@@ -90,3 +90,23 @@ export const demandDeltas: DemandDelta[] = [
   { geo: 'Japan', jrs: 'App Developer-SAP ABAP HANA', practice: 'SAP Application Ops', band: 'B7-8', bottomsUpDemand: 19, topDownDemand: 28, delta: -9, deltaPercent: -32.1, severity: 'high', note: 'Japan SAP pipeline below financial assumptions' },
   { geo: 'UKI', jrs: 'Quality Engineer-Automation', practice: 'Quality Engineering', band: 'B7-8', bottomsUpDemand: 26, topDownDemand: 38, delta: -12, deltaPercent: -31.6, severity: 'high', note: 'UKI QE pipeline gap — potential LondonFS expansion not yet captured' },
 ];
+
+// Demand vs Bench Gap — the primary working view per the spec
+export const demandVsBenchGaps = [
+  { practice: 'Quality Engineering', demandTotal: 318, currentBench: 215, gap: -103, openReqs: 45, hiresInProgress: 28, attritionExpected: 35, isGrowthPractice: true },
+  { practice: 'SAP Application Ops', demandTotal: 272, currentBench: 125, gap: -147, openReqs: 52, hiresInProgress: 18, attritionExpected: 22, isGrowthPractice: true },
+  { practice: 'Custom Application Ops', demandTotal: 198, currentBench: 98, gap: -100, openReqs: 30, hiresInProgress: 15, attritionExpected: 18, isGrowthPractice: false },
+  { practice: 'Data Services', demandTotal: 162, currentBench: 82, gap: -80, openReqs: 25, hiresInProgress: 12, attritionExpected: 14, isGrowthPractice: true },
+  { practice: 'AI & Analytics', demandTotal: 185, currentBench: 78, gap: -107, openReqs: 35, hiresInProgress: 22, attritionExpected: 12, isGrowthPractice: true },
+  { practice: 'Digital Product Engineering iX', demandTotal: 176, currentBench: 95, gap: -81, openReqs: 28, hiresInProgress: 14, attritionExpected: 16, isGrowthPractice: true },
+  { practice: 'Cloud Platform Services', demandTotal: 124, currentBench: 68, gap: -56, openReqs: 18, hiresInProgress: 10, attritionExpected: 10, isGrowthPractice: false },
+  { practice: 'Security Services', demandTotal: 88, currentBench: 43, gap: -45, openReqs: 15, hiresInProgress: 8, attritionExpected: 8, isGrowthPractice: false },
+  { practice: 'Intelligent Automation', demandTotal: 52, currentBench: 28, gap: -24, openReqs: 8, hiresInProgress: 5, attritionExpected: 5, isGrowthPractice: false },
+];
+
+// Demand Churn — how much demand withdrawn/deferred
+export const demandChurnData = [
+  { period: 'Last 30 days', withdrawn: 142, deferred: 88, changed: 65, total: 295, churnRate: 6.3 },
+  { period: 'Last 60 days', withdrawn: 268, deferred: 155, changed: 112, total: 535, churnRate: 11.4 },
+  { period: 'Last 90 days', withdrawn: 385, deferred: 220, changed: 168, total: 773, churnRate: 16.5 },
+];

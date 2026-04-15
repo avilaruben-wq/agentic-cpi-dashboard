@@ -5,6 +5,8 @@ import { totalGapCount, totalRevenueAtRisk, critSitCount } from '../../data/gapD
 import { supplySnapshot } from '../../data/supplyData';
 import { SummaryBar } from '../shared/SummaryBar';
 import { formatNumber, formatCurrency } from '../../utils/format';
+import { tiDemandByPool, tiFulfillmentActions, tiMomMovement } from '../../data/tiData';
+import { DataTable } from '../shared/DataTable';
 
 interface ApproveViewProps {
   agentState: AgentState;
@@ -132,20 +134,87 @@ export const ApproveView: React.FC<ApproveViewProps> = ({ agentState, onStateCha
             </tbody>
           </table>
 
-          <h3 style={docStyles.sectionTitle}>Authorized Fulfillment Actions</h3>
-          {[
-            { action: 'Bench Redeployment', hc: 586 },
-            { action: 'Internal Rotation', hc: 293 },
-            { action: 'Reskill / ANOB', hc: 440 },
-            { action: 'External Hire', hc: 879 },
-            { action: 'Sub-K Contractors', hc: 527 },
-            { action: 'HCAM / FTH', hc: 206 },
-          ].map(a => (
-            <div key={a.action} style={{ display: 'flex', justifyContent: 'space-between', padding: '6px 0', borderBottom: '1px solid #f4f4f4', fontSize: '13px' }}>
-              <span style={{ color: '#161616' }}>{a.action}</span>
-              <span style={{ fontFamily: "'IBM Plex Mono', monospace", fontWeight: 500 }}>{formatNumber(a.hc)} HC</span>
-            </div>
-          ))}
+          {isQuarterly ? (
+            <>
+              <h3 style={docStyles.sectionTitle}>Authorized Fulfillment Actions</h3>
+              {[
+                { action: 'Bench Redeployment', hc: 586 },
+                { action: 'Internal Rotation', hc: 293 },
+                { action: 'Reskill / ANOB', hc: 440 },
+                { action: 'External Hire', hc: 879 },
+                { action: 'Sub-K Contractors', hc: 527 },
+                { action: 'HCAM / FTH', hc: 206 },
+              ].map(a => (
+                <div key={a.action} style={{ display: 'flex', justifyContent: 'space-between', padding: '6px 0', borderBottom: '1px solid #f4f4f4', fontSize: '13px' }}>
+                  <span style={{ color: '#161616' }}>{a.action}</span>
+                  <span style={{ fontFamily: "'IBM Plex Mono', monospace", fontWeight: 500 }}>{formatNumber(a.hc)} HC</span>
+                </div>
+              ))}
+            </>
+          ) : (
+            <>
+              <h3 style={docStyles.sectionTitle}>Monthly Demand by Labor Pool (90-Day View)</h3>
+              <DataTable
+                columns={[
+                  { key: 'laborPool', label: 'Labor Pool', width: '180px' },
+                  { key: 'month1', label: 'Month 1', align: 'right' as const, render: (r: typeof tiDemandByPool[0]) => formatNumber(r.month1), getValue: (r: typeof tiDemandByPool[0]) => r.month1 },
+                  { key: 'month2', label: 'Month 2', align: 'right' as const, render: (r: typeof tiDemandByPool[0]) => formatNumber(r.month2), getValue: (r: typeof tiDemandByPool[0]) => r.month2 },
+                  { key: 'month3', label: 'Month 3', align: 'right' as const, render: (r: typeof tiDemandByPool[0]) => formatNumber(r.month3), getValue: (r: typeof tiDemandByPool[0]) => r.month3 },
+                  { key: 'total', label: 'Total', align: 'right' as const, render: (r: typeof tiDemandByPool[0]) => (
+                    <span style={{ fontWeight: 600 }}>{formatNumber(r.total)}</span>
+                  ), getValue: (r: typeof tiDemandByPool[0]) => r.total },
+                  { key: 'momChange', label: 'MoM Change', align: 'right' as const, render: (r: typeof tiDemandByPool[0]) => (
+                    <span style={{ color: r.momChange > 0 ? theme.green : theme.red, fontWeight: 500 }}>
+                      {r.momChange > 0 ? '+' : ''}{formatNumber(r.momChange)} ({r.momChangePercent > 0 ? '+' : ''}{r.momChangePercent.toFixed(1)}%)
+                    </span>
+                  ), getValue: (r: typeof tiDemandByPool[0]) => r.momChange },
+                ]}
+                data={tiDemandByPool}
+                keyExtractor={r => r.laborPool}
+              />
+
+              <h3 style={docStyles.sectionTitle}>FutureNow Center Fulfillment Actions</h3>
+              <DataTable
+                columns={[
+                  { key: 'action', label: 'Action', width: '200px' },
+                  { key: 'month1', label: 'Month 1', align: 'right' as const, render: (r: typeof tiFulfillmentActions[0]) => formatNumber(r.month1), getValue: (r: typeof tiFulfillmentActions[0]) => r.month1 },
+                  { key: 'month2', label: 'Month 2', align: 'right' as const, render: (r: typeof tiFulfillmentActions[0]) => formatNumber(r.month2), getValue: (r: typeof tiFulfillmentActions[0]) => r.month2 },
+                  { key: 'month3', label: 'Month 3', align: 'right' as const, render: (r: typeof tiFulfillmentActions[0]) => formatNumber(r.month3), getValue: (r: typeof tiFulfillmentActions[0]) => r.month3 },
+                  { key: 'total', label: 'Total', align: 'right' as const, render: (r: typeof tiFulfillmentActions[0]) => (
+                    <span style={{ fontWeight: 600 }}>{formatNumber(r.total)}</span>
+                  ), getValue: (r: typeof tiFulfillmentActions[0]) => r.total },
+                  { key: 'status', label: 'Status', align: 'center' as const, render: (r: typeof tiFulfillmentActions[0]) => (
+                    <span style={{
+                      padding: '2px 8px', borderRadius: theme.radiusSm, fontSize: theme.fontSize.xs, fontWeight: 500,
+                      background: r.status === 'on-track' ? theme.greenBg : r.status === 'at-risk' ? theme.yellowBg : theme.redBg,
+                      color: r.status === 'on-track' ? theme.green : r.status === 'at-risk' ? theme.yellow : theme.red,
+                    }}>
+                      {r.status === 'on-track' ? 'On Track' : r.status === 'at-risk' ? 'At Risk' : 'Behind'}
+                    </span>
+                  ) },
+                ]}
+                data={tiFulfillmentActions}
+                keyExtractor={r => r.action}
+              />
+
+              <h3 style={docStyles.sectionTitle}>Month-over-Month Demand Movement</h3>
+              {tiMomMovement.map(item => (
+                <div key={item.category} style={{
+                  display: 'flex', justifyContent: 'space-between', padding: '6px 0',
+                  borderBottom: '1px solid #f4f4f4', fontSize: '13px',
+                  fontWeight: item.category === 'Net demand movement' ? 600 : 400,
+                }}>
+                  <span style={{ color: '#161616' }}>{item.category}</span>
+                  <span style={{
+                    fontFamily: "'IBM Plex Mono', monospace", fontWeight: 500,
+                    color: item.direction === 'up' ? theme.green : theme.red,
+                  }}>
+                    {item.count > 0 ? '+' : ''}{formatNumber(item.count)}
+                  </span>
+                </div>
+              ))}
+            </>
+          )}
 
           <h3 style={docStyles.sectionTitle}>Approval Signatories</h3>
           {approvers.map(name => (

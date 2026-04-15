@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { theme } from '../../theme';
 import { AgentState, SubStep } from '../../types/ibm';
-import { dealDemands, revenueImpliedDemands, demandDeltas } from '../../data/demandData';
+import { dealDemands, revenueImpliedDemands, demandDeltas, demandVsBenchGaps, demandChurnData } from '../../data/demandData';
 import { DataTable, Column } from '../shared/DataTable';
 import { FilterBar } from '../shared/FilterBar';
 import { SummaryBar } from '../shared/SummaryBar';
@@ -147,6 +147,7 @@ export const Agent2View: React.FC<Agent2ViewProps> = ({ agentState, onStateChang
             <button style={btnStyle(subView === 'bottomsUp')} onClick={() => setSubView('bottomsUp')}>Bottoms-Up</button>
             <button style={btnStyle(subView === 'topDown')} onClick={() => setSubView('topDown')}>Top-Down</button>
             <button style={btnStyle(subView === 'delta')} onClick={() => setSubView('delta')}>Delta {critDeltas > 0 && '●'}</button>
+            <button style={btnStyle(subView === 'demandVsBench')} onClick={() => setSubView('demandVsBench')}>Demand vs Bench</button>
           </div>
 
           <FilterBar geoFilter={filters.geo} practiceFilter={filters.practice} jrsFilter={filters.jrs}
@@ -171,6 +172,61 @@ export const Agent2View: React.FC<Agent2ViewProps> = ({ agentState, onStateChang
                     <strong style={{ color: theme.text }}>Analysis: </strong>{r.note}
                   </div>
                 )} />
+            </>
+          )}
+          {subView === 'demandVsBench' && (
+            <>
+              <DataTable
+                columns={[
+                  { key: 'practice', label: 'Practice', width: '220px' },
+                  { key: 'demandTotal', label: 'Demand', align: 'right' as const, render: (r: typeof demandVsBenchGaps[0]) => formatNumber(r.demandTotal), getValue: (r: typeof demandVsBenchGaps[0]) => r.demandTotal },
+                  { key: 'currentBench', label: 'Bench', align: 'right' as const, render: (r: typeof demandVsBenchGaps[0]) => formatNumber(r.currentBench), getValue: (r: typeof demandVsBenchGaps[0]) => r.currentBench },
+                  { key: 'gap', label: 'Gap', align: 'right' as const, render: (r: typeof demandVsBenchGaps[0]) => (
+                    <span style={{ color: r.gap < 0 ? theme.red : theme.green, fontWeight: theme.fontWeight.semibold }}>
+                      {formatNumber(r.gap)}
+                    </span>
+                  ), getValue: (r: typeof demandVsBenchGaps[0]) => r.gap },
+                  { key: 'openReqs', label: 'Open REQs', align: 'right' as const, render: (r: typeof demandVsBenchGaps[0]) => formatNumber(r.openReqs), getValue: (r: typeof demandVsBenchGaps[0]) => r.openReqs },
+                  { key: 'hiresInProgress', label: 'Hires in Progress', align: 'right' as const, render: (r: typeof demandVsBenchGaps[0]) => formatNumber(r.hiresInProgress), getValue: (r: typeof demandVsBenchGaps[0]) => r.hiresInProgress },
+                  { key: 'attritionExpected', label: 'Attrition', align: 'right' as const, render: (r: typeof demandVsBenchGaps[0]) => formatNumber(r.attritionExpected), getValue: (r: typeof demandVsBenchGaps[0]) => r.attritionExpected },
+                  { key: 'isGrowthPractice', label: 'Growth Practice', align: 'center' as const, render: (r: typeof demandVsBenchGaps[0]) => (
+                    <span style={{
+                      padding: '2px 8px', borderRadius: theme.radiusSm,
+                      background: r.isGrowthPractice ? theme.greenBg : theme.surfaceRaised,
+                      color: r.isGrowthPractice ? theme.green : theme.textMuted,
+                      fontSize: theme.fontSize.xs, fontWeight: theme.fontWeight.medium,
+                    }}>
+                      {r.isGrowthPractice ? 'Y' : 'N'}
+                    </span>
+                  ) },
+                ]}
+                data={demandVsBenchGaps}
+                keyExtractor={r => r.practice}
+              />
+
+              <div style={{ marginTop: theme.sp(2) }}>
+                <div style={{ fontSize: theme.fontSize.base, fontWeight: theme.fontWeight.semibold, color: theme.text, marginBottom: theme.sp(2) }}>
+                  Demand Churn
+                </div>
+                <DataTable
+                  columns={[
+                    { key: 'period', label: 'Period', width: '140px' },
+                    { key: 'withdrawn', label: 'Withdrawn', align: 'right' as const, render: (r: typeof demandChurnData[0]) => formatNumber(r.withdrawn), getValue: (r: typeof demandChurnData[0]) => r.withdrawn },
+                    { key: 'deferred', label: 'Deferred', align: 'right' as const, render: (r: typeof demandChurnData[0]) => formatNumber(r.deferred), getValue: (r: typeof demandChurnData[0]) => r.deferred },
+                    { key: 'changed', label: 'Changed', align: 'right' as const, render: (r: typeof demandChurnData[0]) => formatNumber(r.changed), getValue: (r: typeof demandChurnData[0]) => r.changed },
+                    { key: 'total', label: 'Total', align: 'right' as const, render: (r: typeof demandChurnData[0]) => (
+                      <span style={{ fontWeight: theme.fontWeight.semibold }}>{formatNumber(r.total)}</span>
+                    ), getValue: (r: typeof demandChurnData[0]) => r.total },
+                    { key: 'churnRate', label: 'Churn Rate', align: 'right' as const, render: (r: typeof demandChurnData[0]) => (
+                      <span style={{ color: r.churnRate > 10 ? theme.red : r.churnRate > 5 ? theme.yellow : theme.green, fontWeight: theme.fontWeight.medium }}>
+                        {r.churnRate.toFixed(1)}%
+                      </span>
+                    ), getValue: (r: typeof demandChurnData[0]) => r.churnRate },
+                  ]}
+                  data={demandChurnData}
+                  keyExtractor={r => r.period}
+                />
+              </div>
             </>
           )}
         </>

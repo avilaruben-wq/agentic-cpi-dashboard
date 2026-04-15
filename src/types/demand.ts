@@ -41,4 +41,4 @@ export interface DemandDelta {
   note: string;
 }
 
-export type DemandSubView = 'bottomsUp' | 'topDown' | 'delta';
+export type DemandSubView = 'bottomsUp' | 'topDown' | 'delta' | 'demandVsBench';

@@ -2,15 +2,33 @@ import React from 'react';
 import { theme } from '../../theme';
 import { PlanningMode } from '../../types/ibm';
 
+export type AppView = 'pipeline' | 'dashboard';
+
 interface ModeBannerProps {
   mode: PlanningMode;
+  appView: AppView;
+  onAppViewChange: (v: AppView) => void;
   onReset: () => void;
 }
 
-export const ModeBanner: React.FC<ModeBannerProps> = ({ mode, onReset }) => {
+export const ModeBanner: React.FC<ModeBannerProps> = ({ mode, appView, onAppViewChange, onReset }) => {
   const label = mode === 'quarterly'
     ? 'Quarterly Demand Interlock — Q3 2026 + Q4 2026'
     : '90-Day Talent Report — Apr 14 – Jul 13, 2026';
+
+  const toggleStyle = (active: boolean): React.CSSProperties => ({
+    background: active ? theme.text : 'transparent',
+    color: active ? theme.surface : theme.textMuted,
+    border: `1px solid ${active ? theme.text : theme.surfaceBorder}`,
+    borderRadius: theme.radiusSm,
+    padding: '0 10px',
+    height: '24px',
+    fontSize: theme.fontSize.xs,
+    fontWeight: active ? theme.fontWeight.semibold : theme.fontWeight.regular,
+    cursor: 'pointer',
+    fontFamily: 'inherit',
+    transition: 'all 0.15s',
+  });
 
   return (
     <div style={{
@@ -38,21 +56,24 @@ export const ModeBanner: React.FC<ModeBannerProps> = ({ mode, onReset }) => {
           {label}
         </span>
       </div>
-      <button
-        onClick={onReset}
-        style={{
-          background: 'transparent',
-          border: 'none',
-          color: theme.primary,
-          fontSize: theme.fontSize.xs,
-          cursor: 'pointer',
-          fontFamily: 'inherit',
-          fontWeight: theme.fontWeight.medium,
-          padding: `${theme.sp(1)} ${theme.sp(2)}`,
-        }}
-      >
-        Change
-      </button>
+
+      <div style={{ display: 'flex', alignItems: 'center', gap: theme.sp(2) }}>
+        <div style={{ display: 'flex', gap: '2px' }}>
+          <button style={toggleStyle(appView === 'pipeline')} onClick={() => onAppViewChange('pipeline')}>Pipeline</button>
+          <button style={toggleStyle(appView === 'dashboard')} onClick={() => onAppViewChange('dashboard')}>Dashboard</button>
+        </div>
+        <span style={{ color: theme.surfaceBorder }}>|</span>
+        <button
+          onClick={onReset}
+          style={{
+            background: 'transparent', border: 'none',
+            color: theme.primary, fontSize: theme.fontSize.xs,
+            cursor: 'pointer', fontFamily: 'inherit', fontWeight: theme.fontWeight.medium,
+          }}
+        >
+          Change mode
+        </button>
+      </div>
     </div>
   );
 };

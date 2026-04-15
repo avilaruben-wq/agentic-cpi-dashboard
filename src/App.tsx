@@ -2,9 +2,10 @@ import { useState, useCallback } from 'react';
 import { theme } from './theme';
 import { TabId, AgentState, PlanningMode } from './types/ibm';
 import { Header } from './components/layout/Header';
-import { ModeBanner } from './components/layout/ModeBanner';
+import { ModeBanner, AppView } from './components/layout/ModeBanner';
 import { TabBar } from './components/layout/TabBar';
 import { ModeSelector } from './components/views/ModeSelector';
+import { CapacityBalanceView } from './components/views/CapacityBalanceView';
 import { Agent1View } from './components/views/Agent1View';
 import { Agent2View } from './components/views/Agent2View';
 import { Agent3View } from './components/views/Agent3View';
@@ -30,6 +31,7 @@ const initialAgentStates: Record<TabId, AgentState> = {
 
 function App() {
   const [planningMode, setPlanningMode] = useState<PlanningMode | null>(null);
+  const [appView, setAppView] = useState<AppView>('pipeline');
   const [activeTab, setActiveTab] = useState<TabId>('agent1');
   const [agentStates, setAgentStates] = useState<Record<TabId, AgentState>>(initialAgentStates);
 
@@ -47,12 +49,14 @@ function App() {
 
   const handleModeSelect = (mode: PlanningMode) => {
     setPlanningMode(mode);
+    setAppView('pipeline');
     setActiveTab('agent1');
     setAgentStates(initialAgentStates);
   };
 
   const handleModeReset = () => {
     setPlanningMode(null);
+    setAppView('pipeline');
     setActiveTab('agent1');
     setAgentStates(initialAgentStates);
   };
@@ -83,15 +87,20 @@ function App() {
           </main>
         ) : (
           <>
-            <ModeBanner mode={planningMode} onReset={handleModeReset} />
-            <TabBar activeTab={activeTab} onTabChange={setActiveTab} agentStates={agentStates} />
-            <main style={{
-              flex: 1,
-              padding: `${theme.sp(5)} ${theme.sp(6)}`,
-              animation: 'fadeIn 0.3s ease',
-            }}>
-              {renderView()}
-            </main>
+            <ModeBanner mode={planningMode} appView={appView} onAppViewChange={setAppView} onReset={handleModeReset} />
+
+            {appView === 'dashboard' ? (
+              <main style={{ flex: 1, padding: `${theme.sp(5)} ${theme.sp(6)}`, animation: 'fadeIn 0.3s ease' }}>
+                <CapacityBalanceView />
+              </main>
+            ) : (
+              <>
+                <TabBar activeTab={activeTab} onTabChange={setActiveTab} agentStates={agentStates} />
+                <main style={{ flex: 1, padding: `${theme.sp(5)} ${theme.sp(6)}`, animation: 'fadeIn 0.3s ease' }}>
+                  {renderView()}
+                </main>
+              </>
+            )}
           </>
         )}
       </div>

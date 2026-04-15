@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { theme } from '../../theme';
 import { AgentState, SubStep, PlanningMode } from '../../types/ibm';
-import { gapEntries, totalGapCount, totalRevenueAtRisk, critSitCount } from '../../data/gapData';
+import { gapEntries, totalGapCount, totalRevenueAtRisk, critSitCount, crossGeoConflicts, scenarioNarratives } from '../../data/gapData';
 import { scenarios } from '../../data/scenarioData';
 import { DataTable, Column } from '../shared/DataTable';
 import { FilterBar } from '../shared/FilterBar';
@@ -204,6 +204,32 @@ export const Agent3View: React.FC<Agent3ViewProps> = ({ agentState, onStateChang
             </div>
           )}
 
+          {crossGeoConflicts.length > 0 && (
+            <>
+              <div style={{
+                background: theme.yellowBg, border: `1px solid ${theme.yellow}30`, borderRadius: theme.radius,
+                padding: `${theme.sp(2)} ${theme.sp(3)}`, display: 'flex', alignItems: 'center', gap: theme.sp(2),
+              }}>
+                <span style={{ color: theme.yellow }}>&#9889;</span>
+                <span style={{ color: theme.yellow, fontWeight: theme.fontWeight.semibold, fontSize: theme.fontSize.sm }}>
+                  {crossGeoConflicts.length} cross-GEO conflicts detected — multiple regions competing for the same skills
+                </span>
+              </div>
+              <DataTable
+                columns={[
+                  { key: 'jrs', label: 'JRS', width: '240px' },
+                  { key: 'band', label: 'Band', width: '70px', align: 'center' as const },
+                  { key: 'competingGeos', label: 'Competing GEOs', width: '180px', render: (r: typeof crossGeoConflicts[0]) => r.competingGeos.join(', ') },
+                  { key: 'totalDemand', label: 'Total Demand', align: 'right' as const, render: (r: typeof crossGeoConflicts[0]) => formatNumber(r.totalDemand), getValue: (r: typeof crossGeoConflicts[0]) => r.totalDemand },
+                  { key: 'availableGlobal', label: 'Available', align: 'right' as const, render: (r: typeof crossGeoConflicts[0]) => formatNumber(r.availableGlobal), getValue: (r: typeof crossGeoConflicts[0]) => r.availableGlobal },
+                  { key: 'severity', label: 'Severity', align: 'center' as const, render: (r: typeof crossGeoConflicts[0]) => <SeverityBadge level={r.severity} /> },
+                ]}
+                data={crossGeoConflicts}
+                keyExtractor={r => `${r.jrs}-${r.band}`}
+              />
+            </>
+          )}
+
           <SummaryBar metrics={[
             { label: 'Total gaps', value: formatNumber(totalGapCount), color: theme.red },
             { label: 'Revenue at risk', value: formatCurrency(totalRevenueAtRisk), color: theme.orange },
@@ -257,6 +283,23 @@ export const Agent3View: React.FC<Agent3ViewProps> = ({ agentState, onStateChang
                   <span style={{ fontSize: theme.fontSize.sm, color: '#198038', fontWeight: theme.fontWeight.medium }}>
                     ✓ <strong>{scenarios.find(s => s.type === selectedScenario)?.label}</strong> scenario selected — this will be used for the DI Authorization Letter and SCORE plan
                   </span>
+                </div>
+              )}
+
+              {selectedScenario && scenarioNarratives[selectedScenario] && (
+                <div style={{
+                  padding: `${theme.sp(3)} ${theme.sp(4)}`,
+                  borderLeft: `4px solid ${theme.primary}`,
+                  background: theme.surface,
+                  border: `1px solid ${theme.surfaceBorder}`,
+                  borderLeftColor: theme.primary,
+                  borderLeftWidth: '4px',
+                  borderRadius: theme.radius,
+                  fontSize: theme.fontSize.sm,
+                  color: theme.textSecondary,
+                  lineHeight: 1.6,
+                }}>
+                  {scenarioNarratives[selectedScenario]}
                 </div>
               )}
 
