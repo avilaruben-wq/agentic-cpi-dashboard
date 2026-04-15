@@ -116,7 +116,7 @@ export const Agent2View: React.FC<Agent2ViewProps> = ({ agentState, onStateChang
         color: theme.textMuted, fontSize: theme.fontSize.md, background: theme.surface,
         border: `1px dashed ${theme.surfaceBorder}`, borderRadius: theme.radius,
       }}>
-        🔒 Complete and approve the Supply Baseline Agent first
+        This step requires the Supply Baseline to complete first. Go to Step 1 to begin.
       </div>
     );
   }
@@ -144,10 +144,17 @@ export const Agent2View: React.FC<Agent2ViewProps> = ({ agentState, onStateChang
           ]} />
 
           <div style={{ display: 'flex', gap: theme.sp(2) }}>
-            <button style={btnStyle(subView === 'bottomsUp')} onClick={() => setSubView('bottomsUp')}>Bottoms-Up</button>
-            <button style={btnStyle(subView === 'topDown')} onClick={() => setSubView('topDown')}>Top-Down</button>
+            <button style={btnStyle(subView === 'bottomsUp')} onClick={() => setSubView('bottomsUp')}>Deal Pipeline</button>
+            <button style={btnStyle(subView === 'topDown')} onClick={() => setSubView('topDown')}>Revenue Targets</button>
             <button style={btnStyle(subView === 'delta')} onClick={() => setSubView('delta')}>Delta {critDeltas > 0 && '●'}</button>
             <button style={btnStyle(subView === 'demandVsBench')} onClick={() => setSubView('demandVsBench')}>Demand vs Bench</button>
+          </div>
+
+          <div style={{ fontSize: theme.fontSize.sm, color: theme.textMuted, fontStyle: 'italic' }}>
+            {subView === 'bottomsUp' && 'Demand from signed deals and pipeline, scored by win probability'}
+            {subView === 'topDown' && 'Demand implied by revenue targets — what finance expects us to deliver'}
+            {subView === 'delta' && 'Where deal-backed demand diverges from financial targets — the key planning gap'}
+            {subView === 'demandVsBench' && 'Can current bench fill the demand? The gap drives hiring and fulfillment actions'}
           </div>
 
           <FilterBar geoFilter={filters.geo} practiceFilter={filters.practice} jrsFilter={filters.jrs}

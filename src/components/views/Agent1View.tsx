@@ -102,6 +102,12 @@ export const Agent1View: React.FC<Agent1ViewProps> = ({ agentState, onStateChang
             ))}
           </div>
 
+          <div style={{ fontSize: theme.fontSize.sm, color: theme.textMuted, fontStyle: 'italic' }}>
+            {subTab === 'overview' && 'Headcount and utilization summary across all GEOs'}
+            {subTab === 'bench' && 'How long people have been on the bench — longer tenures need action'}
+            {subTab === 'workforce' && 'Headcount reconciliation, attrition tracking, and hiring pipeline'}
+          </div>
+
           {subTab === 'overview' && (
             <>
               <FilterBar
@@ -165,8 +171,11 @@ export const Agent1View: React.FC<Agent1ViewProps> = ({ agentState, onStateChang
             <>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: theme.sp(5) }}>
                 <div>
-                  <div style={{ fontSize: theme.fontSize.base, fontWeight: theme.fontWeight.semibold, color: theme.text, marginBottom: theme.sp(2) }}>
+                  <div style={{ fontSize: theme.fontSize.base, fontWeight: theme.fontWeight.semibold, color: theme.text, marginBottom: theme.sp(1) }}>
                     Funded vs Supervisory HC
+                  </div>
+                  <div style={{ fontSize: theme.fontSize.xs, color: theme.textMuted, marginBottom: theme.sp(2) }}>
+                    Where funded headcount differs from supervisory org — a common source of planning errors
                   </div>
                   <DataTable
                     columns={[
@@ -187,8 +196,11 @@ export const Agent1View: React.FC<Agent1ViewProps> = ({ agentState, onStateChang
                   />
                 </div>
                 <div>
-                  <div style={{ fontSize: theme.fontSize.base, fontWeight: theme.fontWeight.semibold, color: theme.text, marginBottom: theme.sp(2) }}>
+                  <div style={{ fontSize: theme.fontSize.base, fontWeight: theme.fontWeight.semibold, color: theme.text, marginBottom: theme.sp(1) }}>
                     Attrition
+                  </div>
+                  <div style={{ fontSize: theme.fontSize.xs, color: theme.textMuted, marginBottom: theme.sp(2) }}>
+                    Voluntary (EIS) and involuntary (MIS) attrition vs plan
                   </div>
                   <DataTable
                     columns={[
@@ -206,8 +218,11 @@ export const Agent1View: React.FC<Agent1ViewProps> = ({ agentState, onStateChang
                 </div>
               </div>
 
-              <div style={{ fontSize: theme.fontSize.base, fontWeight: theme.fontWeight.semibold, color: theme.text, marginBottom: theme.sp(2) }}>
+              <div style={{ fontSize: theme.fontSize.base, fontWeight: theme.fontWeight.semibold, color: theme.text, marginBottom: theme.sp(1) }}>
                 Hires YTD
+              </div>
+              <div style={{ fontSize: theme.fontSize.xs, color: theme.textMuted, marginBottom: theme.sp(2) }}>
+                Hiring pipeline status by GEO
               </div>
               <DataTable
                 columns={[

@@ -10,10 +10,18 @@ const statusColor: Record<TrafficLight, string> = {
 
 const trendArrow = (trend: BalanceMetric['trend']) => {
   switch (trend) {
-    case 'improving': return <span style={{ color: '#198038' }}>&#8593;</span>;
-    case 'stable': return <span style={{ color: theme.textMuted }}>&rarr;</span>;
-    case 'declining': return <span style={{ color: '#da1e28' }}>&#8595;</span>;
+    case 'improving': return <span style={{ color: '#198038' }}>&#8593; Improving</span>;
+    case 'stable': return <span style={{ color: theme.textMuted }}>&rarr; Stable</span>;
+    case 'declining': return <span style={{ color: '#da1e28' }}>&#8595; Declining</span>;
   }
+};
+
+const categoryDescriptions: Record<string, string> = {
+  'HC Dynamics': 'Headcount inflows and outflows',
+  'Utilization': 'How effectively the workforce is deployed',
+  'Bench & Availability': 'Unassigned capacity and bench health',
+  'Workforce Mix': 'Composition targets for offshore, band level, and contractors',
+  'Demand & Fulfillment': 'Demand pipeline health and fill performance',
 };
 
 export const CapacityBalanceView: React.FC = () => {
@@ -55,6 +63,11 @@ export const CapacityBalanceView: React.FC = () => {
             background: theme.surfaceRaised,
           }}>
             {group.category}
+            {categoryDescriptions[group.category] && (
+              <span style={{ fontSize: theme.fontSize.xs, color: theme.textMuted, fontWeight: theme.fontWeight.regular, marginLeft: theme.sp(2) }}>
+                — {categoryDescriptions[group.category]}
+              </span>
+            )}
           </div>
           <table style={{ width: '100%', borderCollapse: 'collapse' }}>
             <thead>
@@ -126,13 +139,18 @@ export const CapacityBalanceView: React.FC = () => {
                     textAlign: 'center',
                     borderBottom: `1px solid ${theme.surfaceBorder}`,
                   }}>
-                    <span style={{
-                      display: 'inline-block',
-                      width: '10px',
-                      height: '10px',
-                      borderRadius: '50%',
-                      background: statusColor[m.status],
-                    }} />
+                    <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                      <span style={{
+                        display: 'inline-block',
+                        width: '10px',
+                        height: '10px',
+                        borderRadius: '50%',
+                        background: statusColor[m.status],
+                      }} />
+                      <span style={{ fontSize: theme.fontSize.xs, color: statusColor[m.status], fontWeight: theme.fontWeight.medium }}>
+                        {m.status === 'green' ? 'On Track' : m.status === 'amber' ? 'At Risk' : 'Off Track'}
+                      </span>
+                    </span>
                   </td>
                   <td style={{
                     padding: `${theme.sp(2)} ${theme.sp(4)}`,

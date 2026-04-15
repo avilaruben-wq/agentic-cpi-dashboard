@@ -59,8 +59,8 @@ export const ModeBanner: React.FC<ModeBannerProps> = ({ mode, appView, onAppView
 
       <div style={{ display: 'flex', alignItems: 'center', gap: theme.sp(2) }}>
         <div style={{ display: 'flex', gap: '2px' }}>
-          <button style={toggleStyle(appView === 'pipeline')} onClick={() => onAppViewChange('pipeline')}>Pipeline</button>
-          <button style={toggleStyle(appView === 'dashboard')} onClick={() => onAppViewChange('dashboard')}>Dashboard</button>
+          <button style={toggleStyle(appView === 'pipeline')} onClick={() => onAppViewChange('pipeline')}>Run Agents</button>
+          <button style={toggleStyle(appView === 'dashboard')} onClick={() => onAppViewChange('dashboard')}>Overview</button>
         </div>
         <span style={{ color: theme.surfaceBorder }}>|</span>
         <button

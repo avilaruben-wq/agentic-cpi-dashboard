@@ -173,7 +173,7 @@ export const Agent3View: React.FC<Agent3ViewProps> = ({ agentState, onStateChang
         color: theme.textMuted, fontSize: theme.fontSize.md, background: theme.surface,
         border: `1px dashed ${theme.surfaceBorder}`, borderRadius: theme.radius,
       }}>
-        🔒 Complete and approve the Demand Forecast Agent first
+        This step requires the Demand Forecast to complete first. Go to Step 2 to continue.
       </div>
     );
   }
@@ -238,10 +238,14 @@ export const Agent3View: React.FC<Agent3ViewProps> = ({ agentState, onStateChang
           ]} />
 
           {isQuarterly && (
-            <div style={{ display: 'flex', gap: theme.sp(2) }}>
-              <button style={btnStyle(section === 'gaps')} onClick={() => setSection('gaps')}>Gap Register</button>
-              <button style={btnStyle(section === 'scenarios')} onClick={() => setSection('scenarios')}>Scenario Comparison</button>
-            </div>
+            <>
+              <div style={{ display: 'flex', gap: theme.sp(2) }}>
+                <button style={btnStyle(section === 'gaps')} onClick={() => setSection('gaps')}>Gap Register</button>
+                <button style={btnStyle(section === 'scenarios')} onClick={() => setSection('scenarios')}>Scenario Comparison</button>
+              </div>
+              {section === 'gaps' && <div style={{ fontSize: theme.fontSize.sm, color: theme.textMuted, fontStyle: 'italic' }}>Staffing shortfalls ranked by severity — expand any row to see the recommended fulfillment plan</div>}
+              {section === 'scenarios' && <div style={{ fontSize: theme.fontSize.sm, color: theme.textMuted, fontStyle: 'italic' }}>Compare fulfillment scenarios — select one to use for the final authorization</div>}
+            </>
           )}
 
           {section === 'gaps' && (

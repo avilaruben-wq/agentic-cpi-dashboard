@@ -54,7 +54,7 @@ export const ApproveView: React.FC<ApproveViewProps> = ({ agentState, onStateCha
         color: theme.textMuted, fontSize: theme.fontSize.md, background: theme.surface,
         border: `1px dashed ${theme.surfaceBorder}`, borderRadius: theme.radius,
       }}>
-        🔒 Complete and approve all three agents first
+        This step becomes available after all three agents have been completed and approved.
       </div>
     );
   }
